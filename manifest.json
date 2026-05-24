@@ -1,0 +1,20 @@
+{
+  "name": "Kocaeli Muharebesi",
+  "short_name": "KocaeliGame",
+  "description": "Başıboş köpekleri topla, barınağa götür, şehri koru!",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#222222",
+  "theme_color": "#4CAF50",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games"]
+}

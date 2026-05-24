@@ -1,0 +1,13 @@
+# Geliştirme araçları - GitHub'a yükleme
+node_modules/
+package-lock.json
+package.json
+
+# Yedek ve geçici klasörler
+_backup/
+resize/
+versions/
+ses/
+
+# Geçici scriptler
+convert_webp.js

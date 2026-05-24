@@ -1,998 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kocaeli Muharebesi: Final</title>
-    <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #222; font-family: 'Segoe UI', sans-serif; touch-action: none; cursor: url('cursor1.png') 0 0, auto; }
-        body.clicking { cursor: url('cursor2.png') 0 0, auto; }
-        canvas { display: block; cursor: inherit; }
-        
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .hud-item { position: absolute; background: rgba(0, 0, 0, 0.5); color: white; padding: 10px 20px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; pointer-events: auto; cursor: inherit; }
-        
-        /* FIXED: Capacity Icon Size */
-        .hud-icon { width: 40px; height: 40px; object-fit: contain; display: block; }
-        
-        #money-counter { top: 20px; left: 20px; color: #ffd700; }
-        #capacity-counter { top: 20px; right: 20px; color: #fff; }
-        #fullscreen-btn { position: absolute; bottom: 30px; left: 30px; background: #2196F3; color: white; padding: 10px 20px; border-radius: 20px; font-size: 24px; font-weight: bold; border: 2px solid #fff; cursor: pointer; pointer-events: auto; z-index: 300; }
-        #nalbur-btn { bottom: 30px; right: 30px; background: #ff9800; color: white; cursor: pointer; border: 2px solid #fff; }
-        
-        #loading-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #333; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; z-index: 200; flex-direction: column; cursor: wait; }
-        .progress-bar { width: 300px; height: 20px; background: #555; margin-top: 20px; border-radius: 10px; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: #4CAF50; transition: width 0.2s; }
-        
-        /* MAIN MENU STYLES */
-        #main-menu { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background-image: url('background.jpg'); background-size: cover; background-position: center;
-            display: none; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 150; color: white; pointer-events: auto; 
-        }
-        #main-menu::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: -1; }
-        
-        /* TITLE & BUTTONS */
-        #menu-center { display: flex; flex-direction: column; align-items: center; margin-bottom: 150px; z-index: 10; }
-        #main-menu h1 { font-size: 80px; margin: 0; color: #4CAF50; text-shadow: 4px 4px 0 #000; }
-        #main-menu h3 { font-size: 28px; margin-bottom: 40px; color: #aaa; font-weight: normal; }
-        .menu-btn { padding: 15px 40px; font-size: 28px; font-weight: bold; background: white; color: #333; border: none; border-radius: 50px; cursor: pointer; margin: 10px; transition: transform 0.1s; width: 300px; }
-        .menu-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-        /* CHARACTERS ON MENU */
-        #menu-left { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 5; }
-        #menu-left img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
-        #menu-left img:hover { transform: scale(1.1); }
+    <!-- SEO & Deployment Meta -->
+    <title>Kocaeli Muharebesi – Umuttepe Macerası</title>
+    <meta name="description" content="Kocaeli Muharebesi: Başıboş köpekleri topla, barınağa götür, şehri koru! Heyecan dolu bir 2D strateji oyunu.">
+    <meta name="keywords" content="kocaeli, muharebe, oyun, browser game, strateji, köpek">
+    <meta name="author" content="Kocaeli Muharebesi">
+    <meta name="theme-color" content="#4CAF50">
 
-        #menu-right-container { position: absolute; top: 50%; right: 30px; transform: translateY(-50%); display: flex; gap: 20px; z-index: 5; }
-        .menu-col { display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
-        .menu-col img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
-        .menu-col img:hover { transform: scale(1.1); }
+    <!-- Open Graph (Facebook, WhatsApp, Discord paylaşım) -->
+    <meta property="og:title" content="Kocaeli Muharebesi – Umuttepe Macerası">
+    <meta property="og:description" content="Başıboş köpekleri topla, barınağa götür, şehri koru! Ücretsiz tarayıcı oyunu.">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:type" content="website">
 
-        #menu-bottom { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; align-items: flex-end; z-index: 5; }
-        #menu-bottom img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
-        #menu-bottom img:hover { transform: translateY(-10px); }
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kocaeli Muharebesi">
+    <meta name="twitter:description" content="Başıboş köpekleri topla, barınağa götür, şehri koru!">
+    <meta name="twitter:image" content="icon.png">
 
-        /* HOW TO PLAY MODAL (SLIDER STYLE) */
-        #how-to-play { 
-            display: none; 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; height: 85%;
-            background: rgba(0, 0, 0, 0.95);
-            border: 4px solid #4CAF50; border-radius: 20px;
-            z-index: 500; 
-            flex-direction: row; align-items: center; justify-content: space-between;
-            padding: 20px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            color: white;
-        }
-        #htp-close { position: absolute; top: 15px; right: 25px; font-size: 40px; cursor: pointer; color: #fff; z-index: 501; }
-        #htp-close:hover { color: #ff4444; }
-        
-        .nav-arrow { font-size: 60px; cursor: pointer; padding: 20px; user-select: none; color: #888; transition: 0.2s; z-index: 502; }
-        .nav-arrow:hover { color: #fff; transform: scale(1.2); }
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
 
-        #slide-content { 
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; overflow: hidden;
-        }
-        /* Container for multiple images in slider */
-        #slide-img-container {
-            display: flex; gap: 20px; justify-content: center; align-items: flex-end;
-            height: 300px; margin-bottom: 20px;
-        }
-        .slide-img-item { 
-            height: 100%; width: auto; object-fit: contain; 
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); 
-        }
-        /* Special style for Boss Dog (Red & Big) */
-        .boss-dog-style {
-            filter: sepia(1) saturate(4) hue-rotate(-50deg) drop-shadow(0 0 20px red) !important;
-            transform: scale(1.3);
-        }
-
-        #slide-title { font-size: 48px; color: #FFD700; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; }
-        
-        /* Text styling for long descriptions */
-        #slide-desc { 
-            font-size: 20px; max-width: 900px; line-height: 1.6; color: #ddd; 
-            white-space: pre-line; /* Handle new lines */
-            text-align: left;
-            max-height: 40vh; overflow-y: auto; /* Scroll if text is too long */
-            padding: 0 20px;
-        }
-        /* Centered text for short descriptions */
-        .text-center #slide-desc { text-align: center; }
-
-        /* ALERTS */
-        #boss-alert { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; font-weight: bold; color: #ff4444; text-shadow: 2px 2px 0 #000; display: none; animation: pulse 1s infinite; z-index: 20; text-align: center; width: 100%; }
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
-        #pandemic-hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(200, 0, 0, 0.85); color: white; padding: 15px 25px; border-radius: 10px; font-size: 24px; font-weight: bold; display: none; text-align: center; border: 3px solid #fff; z-index: 15; box-shadow: 0 0 15px red; }
-        
-        #game-screen-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(180, 0, 0, 0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; color: white; text-align: center; pointer-events: auto; backdrop-filter: blur(5px); transition: background 1s; }
-        #overlay-title { font-size: 60px; text-shadow: 4px 4px 0 #000; margin-bottom: 40px; color: #ffdddd; }
-        #restart-btn { padding: 20px 50px; font-size: 32px; font-weight: bold; background: white; color: #d32f2f; border: none; border-radius: 15px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); pointer-events: auto; transition: transform 0.1s; }
-        #restart-btn:hover { transform: scale(1.05); }
-        
-        #debug-log { font-size: 14px; color: #aaa; margin-top: 10px; font-family: monospace; text-align: center; padding: 10px; }
-        #error-display { color: #ff5555; font-weight: bold; margin-top: 10px; max-width: 80%; word-wrap: break-word; background:rgba(0,0,0,0.8); padding:10px; border-radius:5px; display:none;}
-        
-        #upgrade-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 50; justify-content: center; align-items: center; pointer-events: auto; cursor: inherit; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 80%; max-width: 700px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); cursor: default; }
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #555; }
-        .upgrade-grid { display: flex; justify-content: space-around; margin-top: 20px; gap: 20px; flex-wrap: wrap; }
-        .upgrade-card { background: #f5f5f5; padding: 20px; border-radius: 15px; flex: 1; min-width: 120px; display: flex; flex-direction: column; align-items: center; cursor: pointer; border: 2px solid transparent; }
-        .upgrade-card:hover { background: #e0e0e0; } .upgrade-card.disabled { opacity: 0.5; cursor: not-allowed; }
-        .upgrade-icon { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; }
-        .upgrade-price { background: #4CAF50; color: white; padding: 5px 15px; border-radius: 15px; margin-top: 10px; font-weight: bold; }
-    </style>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="loading-screen"><div>Yükleniyor...</div><div class="progress-bar"><div class="progress-fill" id="loading-fill"></div></div><div id="debug-log">Başlatılıyor...</div><div id="error-display"></div></div>
+    <!-- DİKEY MOD UYARISI -->
+    <div id="portrait-warning">
+        <div class="rotate-icon">📱</div>
+        <h2>Telefonu Döndür</h2>
+        <p>Kocaeli Muharebesi yatay modda oynanır. Lütfen telefonunu yan çevir.</p>
+    </div>
 
+    <!-- YÜKLENİYOR -->
+    <div id="loading-screen">
+        <div>Yükleniyor...</div>
+        <div class="progress-bar"><div class="progress-fill" id="loading-fill"></div></div>
+        <div id="debug-log">Başlatılıyor...</div>
+        <div id="error-display"></div>
+    </div>
+
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-title">Kocaeli Muharebesi</div>
+            <div id="welcome-msg"></div>
+            <input type="text" id="player-name-input" class="login-input" placeholder="ADINIZI GİRİNİZ" maxlength="12">
+            <button id="login-btn" class="login-btn">GİRİŞ</button>
+            <div id="switch-user-btn" class="switch-user" style="display:none;">Farklı bir isimle oyna</div>
+        </div>
+    </div>
+
+    <!-- ANA MENÜ -->
     <div id="main-menu">
         <div id="menu-center">
             <h1>Kocaeli Muharebesi</h1>
             <h3>Umuttepe Macerası</h3>
-            <button class="menu-btn" id="play-btn">OYUNA BAŞLA</button>
-            <button class="menu-btn" id="info-btn">NASIL OYNANIR?</button>
+            <button class="menu-btn" id="play-btn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> OYUNA BAŞLA
+            </button>
+            <button class="menu-btn" id="load-btn">
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> YÜKLE
+            </button>
+            <button class="menu-btn" id="scores-btn">
+                <svg viewBox="0 0 24 24"><path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/></svg> SKOR TABLOSU
+            </button>
+            <button class="menu-btn" id="settings-menu-btn">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> AYARLAR
+            </button>
+            <button class="menu-btn" id="info-btn">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg> NASIL OYNANIR?
+            </button>
         </div>
-        
+        <button id="mm-fullscreen-btn">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg> TAM EKRAN
+        </button>
         <div id="menu-left">
-            <img src="activist.png" title="Aktivist" style="width: 250px;"> 
-            <img src="activist2.png" title="Aktivist 2" style="width: 150px;">
-            <img src="activist3.png" title="Sürücü" style="width: 150px;">
-            <img src="boss1.png" title="Patron" style="width: 225px;">
+            <img src="activist.webp" style="width:250px" alt="Aktivist">
+            <img src="activist2.webp" style="width:150px" alt="Aktivist 2">
+            <img src="activist3.webp" style="width:150px" alt="Aktivist 3">
+            <img src="boss1.webp" style="width:225px" alt="Boss">
         </div>
-
         <div id="menu-right-container">
-            <div class="menu-col" id="menu-right-col1">
-                <img src="valihappy.png" title="Vali" style="width: 120px;">
-                <img src="playerhappy2.png" title="Kahraman" style="width: 250px;">
+            <div class="menu-col">
+                <img src="valihappy.webp" style="width:120px" alt="Vali">
+                <img src="playerhappy2.webp" style="width:250px" alt="Oyuncu">
             </div>
-            <div class="menu-col" id="menu-right-col2">
-                <img src="helperhappy2.png" title="Ekip" style="width: 250px;">
-                <img src="policehappy.png" title="Polis" style="width: 150px;">
-                <img src="cleanerhappy.png" title="Temizlikçi" style="width: 150px;">
+            <div class="menu-col">
+                <img src="helperhappy2.webp" style="width:250px" alt="Yardımcı">
+                <img src="policehappy.webp" style="width:150px" alt="Polis">
+                <img src="cleanerhappy.webp" style="width:150px" alt="Temizlikçi">
             </div>
         </div>
-
         <div id="menu-bottom">
-            <img src="Pation2happy2.png" title="Mutlu Vatandaş" style="height: 168px;">
-            <img src="Pation1happy2.png" title="Mutlu Vatandaş" style="height: 210px;">
-            <img src="Pation3happy2.png" title="Mutlu Vatandaş" style="height: 240px;">
+            <img src="Pation2happy2.webp" style="height:168px" alt="Hasta 2">
+            <img src="Pation1happy2.webp" style="height:210px" alt="Hasta 1">
+            <img src="Pation3happy2.webp" style="height:240px" alt="Hasta 3">
         </div>
     </div>
 
+    <!-- NASIL OYNANIR -->
     <div id="how-to-play">
-        <span id="htp-close">&times;</span>
+        <span id="htp-close" class="modal-close">&times;</span>
         <div class="nav-arrow" id="prev-slide">&#10094;</div>
-        
         <div id="slide-content">
-            <div id="slide-img-container">
-                </div>
+            <div id="slide-img-container"></div>
             <h2 id="slide-title"></h2>
             <p id="slide-desc"></p>
         </div>
-
         <div class="nav-arrow" id="next-slide">&#10095;</div>
     </div>
 
-    <div id="fullscreen-btn">TAM EKRAN</div>
+    <!-- AYARLAR MODALİ -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span id="settings-close" class="modal-close">&times;</span>
+            <div class="modal-title">Ayarlar</div>
+            <div class="setting-row">
+                <span>İsim</span>
+                <div style="display:flex;gap:5px">
+                    <input type="text" id="setting-name-input" style="padding:5px;width:150px;border-radius:5px;font-size:20px" maxlength="12">
+                    <button id="setting-name-save" style="padding:5px 10px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:bold">KAYDET</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <span>Müzik</span>
+                <input type="range" id="volume-music" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-row">
+                <span>Ses Efektleri</span>
+                <input type="range" id="volume-sfx" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div id="ingame-settings-controls" style="display:none;flex-direction:column;gap:10px;margin-top:20px">
+                <button class="modal-btn btn-dark" id="ingame-fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg> TAM EKRAN
+                </button>
+                <button class="modal-btn btn-green" id="ingame-save">
+                    <svg viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> KAYDET
+                </button>
+                <button class="modal-btn btn-blue" id="ingame-restart">
+                    <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg> YENİDEN BAŞLAT
+                </button>
+                <button class="modal-btn btn-red" id="ingame-exit">
+                    <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg> ANA MENÜ
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <!-- SKOR TABLOSU MODALİ -->
+    <div id="scoreboard-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span id="scoreboard-close" class="modal-close">&times;</span>
+            <div class="modal-title">En Yüksek Skorlar</div>
+            <table class="score-table" id="score-table-body"></table>
+        </div>
+    </div>
+
+    <!-- OYUN BİTİŞ EKRANI -->
     <div id="game-screen-overlay">
         <h1 id="overlay-title"></h1>
         <button id="restart-btn">TEKRAR OYNA</button>
     </div>
 
+    <!-- OYUN İÇİ HUD -->
     <div id="ui-layer">
-        <div id="money-counter" class="hud-item"><span>₺</span><span id="money-val">0</span></div>
-        <div id="capacity-counter" class="hud-item">
-            <img id="hud-capacity-icon" class="hud-icon" src="" alt="Cage">
-            <span id="capacity-val" style="margin-left: 10px;">0/1</span>
+        <div id="money-counter" class="hud-item">
+            <span>₺</span><span id="money-val">0</span>
         </div>
-        <div id="nalbur-btn" class="hud-item">NALBUR</div>
-        <div id="boss-alert">BOSS GELİYOR!</div><div id="pandemic-hud">SALGIN TEHLİKESİ<br><span id="pandemic-time">60</span>s</div>
+        <div id="score-counter" class="hud-item">
+            <span>SKOR:</span><span id="score-val">0</span>
+        </div>
+        <div id="capacity-counter" class="hud-item">
+            <img id="hud-capacity-icon" class="hud-icon" src="" alt="Kapasite">
+            <span id="capacity-val" style="margin-left:10px">0/1</span>
+        </div>
+        <div id="market-btn" class="hud-item">MARKET</div>
+        <button id="game-settings-btn" class="hud-item" title="Ayarlar">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+        </button>
+        <div id="boss-alert">BOSS GELİYOR!</div>
+        <div id="pandemic-hud">SALGIN TEHLİKESİ<br><span id="pandemic-time">60</span>s</div>
     </div>
 
-    <div id="upgrade-modal">
-        <div class="modal-content"><span class="close-btn">&times;</span><h2>Nalbur</h2>
+    <!-- MARKET MODALİ -->
+    <div id="market-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="market-header">MARKET</h2>
             <div class="upgrade-grid">
-                <div class="upgrade-card" id="btn-speed"><img src="" class="upgrade-icon" id="icon-speed"><div>HIZ</div><div class="upgrade-price" id="price-speed">₺50</div></div>
-                <div class="upgrade-card" id="btn-capacity"><img src="" class="upgrade-icon" id="icon-capacity"><div>KAFES</div><div class="upgrade-price" id="price-capacity">₺100</div></div>
-                <div class="upgrade-card" id="btn-cleaner"><img src="" class="upgrade-icon" id="icon-cleaner"><div>TEMİZLİKÇİ</div><div class="upgrade-price" id="price-cleaner">₺500</div></div>
-                <div class="upgrade-card" id="btn-helper"><img src="" class="upgrade-icon" id="icon-helper"><div>YAKALAMA TİMİ</div><div class="upgrade-price" id="price-helper">₺600</div></div>
-                <div class="upgrade-card" id="btn-police"><img src="" class="upgrade-icon" id="icon-police"><div>POLİS</div><div class="upgrade-price" id="price-police">₺600</div></div>
+                <div class="upgrade-card" id="btn-speed">
+                    <img src="" class="upgrade-icon" id="icon-speed" alt="Hız">
+                    <div class="upgrade-title">HIZ</div>
+                    <div class="upgrade-price" id="price-speed">₺50</div>
+                </div>
+                <div class="upgrade-card" id="btn-capacity">
+                    <img src="" class="upgrade-icon" id="icon-capacity" alt="Kapasite">
+                    <div class="upgrade-title">KAFES</div>
+                    <div class="upgrade-price" id="price-capacity">₺100</div>
+                </div>
+                <div class="upgrade-card" id="btn-cleaner">
+                    <img src="" class="upgrade-icon" id="icon-cleaner" alt="Temizlikçi">
+                    <div class="upgrade-title">TEMİZLİKÇİ</div>
+                    <div class="upgrade-price" id="price-cleaner">₺500</div>
+                </div>
+                <div class="upgrade-card" id="btn-helper">
+                    <img src="" class="upgrade-icon" id="icon-helper" alt="Ekip">
+                    <div class="upgrade-title">EKİP</div>
+                    <div class="upgrade-price" id="price-helper">₺600</div>
+                </div>
+                <div class="upgrade-card" id="btn-police">
+                    <img src="" class="upgrade-icon" id="icon-police" alt="Polis">
+                    <div class="upgrade-title">POLİS</div>
+                    <div class="upgrade-price" id="price-police">₺600</div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- CANVAS -->
     <canvas id="gameCanvas"></canvas>
 
-    <script>
-        function showError(msg) {
-            const el = document.getElementById('error-display');
-            if (el) { el.style.display = 'block'; el.innerHTML += `<div>${msg}</div>`; }
-            document.getElementById('loading-screen').style.display = 'none';
-            console.error(msg);
-        }
-
-        window.onerror = function(message, source, lineno, colno, error) {
-            showError(`Hata: ${message} (Satır: ${lineno})`);
-        };
-
-        function log(msg) { console.log(msg); const el = document.getElementById('debug-log'); if(el) el.innerText = msg; }
-
-        const CONFIG = {
-            WORLD_WIDTH: 2500, WORLD_HEIGHT: 2500, PLAYER_SPEED_BASE: 450, PLAYER_CAPACITY_BASE: 1,
-            DOG_SPAWN_INTERVAL: 2000, MAX_DOGS: 30, ACTIVIST_COUNT: 5, ACTIVIST_SPEED: 100, ACTIVIST_STUN_DURATION: 2000, STACK_HEIGHT_OFFSET: 15,
-            DEPOSIT_RATE: 100, UPGRADE_COST_SPEED: 50, UPGRADE_COST_CAPACITY: 100, UPGRADE_COST_CLEANER: 500, UPGRADE_COST_HELPER: 600, UPGRADE_COST_POLICE: 600,
-            SAFE_ZONE_RADIUS: 400, BUILDING_BOUNDS: { x: 0, y: 0, w: 600, h: 600 },
-            FOOD_EAT_TIME: 6000, CIVILIAN_EAT_TIME: 5000, HELPER_CAPACITY: 2,
-            BOSS_DROPS_BASE: 30, BOSS_WAVE_DELAY: 120, CLEANER_SPEED_NORMAL: 80, CLEANER_SPEED_FAST: 400
-        };
-
-        // SOUND MANAGER CLASS
-        class SoundManager {
-            constructor() {
-                this.bgm = null;
-                this.currentTrackName = null;
-                this.sounds = {};
-            }
-
-            loadSounds() {
-                const soundFiles = [
-                    'Mainmenu', 'gamestart1', 'gamestart2', 'intruder_vehiclewave1_1', 'intruder_vehiclewave1_2',
-                    'intruder_vehiclewave2_1', 'intruder_vehiclewave2_2', 'bosswave1_1', 'bosswave1_2',
-                    'bosswave2_1', 'bosswave2_2', 'bosswave3_1', 'vali', 'gameover'
-                ];
-                soundFiles.forEach(name => {
-                    try {
-                        this.sounds[name] = new Audio(`${name}.mp3`);
-                        this.sounds[name].preload = 'auto';
-                    } catch (e) {
-                        console.warn("Ses dosyası yüklenemedi:", name);
-                    }
-                });
-            }
-
-            playMusicSequence(introName, loopName) {
-                if (this.currentTrackName === introName) return;
-                this.stopMusic();
-                this.currentTrackName = introName;
-
-                const intro = this.sounds[introName];
-                const loop = this.sounds[loopName];
-
-                if (intro) {
-                    intro.currentTime = 0;
-                    intro.volume = 0.5;
-                    intro.loop = false;
-                    
-                    if (introName === 'gamestart1' && loopName === 'gamestart1') {
-                        intro.loop = true;
-                        intro.play().catch(e => console.warn("Audio play blocked", e));
-                        this.bgm = intro;
-                        return;
-                    }
-
-                    intro.play().catch(e => console.warn("Audio play blocked", e));
-                    this.bgm = intro;
-
-                    if (loop) {
-                        intro.onended = () => {
-                            loop.currentTime = 0;
-                            loop.volume = 0.5;
-                            loop.loop = true;
-                            loop.play().catch(e => console.warn("Loop blocked", e));
-                            this.bgm = loop;
-                            this.currentTrackName = loopName;
-                        };
-                    }
-                }
-            }
-
-            playLoop(name) {
-                if (this.currentTrackName === name) return;
-                this.stopMusic();
-                this.currentTrackName = name;
-                const snd = this.sounds[name];
-                if (snd) {
-                    snd.currentTime = 0;
-                    snd.loop = true;
-                    snd.volume = 0.5;
-                    snd.play().catch(e => console.warn("Loop blocked", e));
-                    this.bgm = snd;
-                }
-            }
-
-            stopMusic() {
-                if (this.bgm) {
-                    this.bgm.pause();
-                    this.bgm.currentTime = 0;
-                    this.bgm.onended = null;
-                    this.bgm = null;
-                }
-                this.currentTrackName = null;
-            }
-        }
-
-        class AssetManager {
-            constructor() {
-                this.assets = {};
-                this.toLoad = [
-                    { name: 'background', src: 'background1.jpg' }, { name: 'player', src: 'player.png' }, { name: 'player1', src: 'player1.png' }, { name: 'playerhappy1', src: 'playerhappy1.png' }, { name: 'playerhappy2', src: 'playerhappy2.png' },
-                    { name: 'vehicle', src: 'vehicle.png' }, 
-                    { name: 'activist', src: 'activist.png' }, { name: 'activist2', src: 'activist2.png' }, { name: 'activist3', src: 'activist3.png' },
-                    { name: 'dog1', src: 'dog1.png' }, { name: 'dog2', src: 'dog2.png' }, { name: 'dog3', src: 'dog3.png' },
-                    { name: 'patient1', src: 'patient1.png' }, { name: 'Pation1happy1', src: 'Pation1happy1.png' }, { name: 'Pation1happy2', src: 'Pation1happy2.png' },
-                    { name: 'patient2', src: 'patient2.png' }, { name: 'Pation2happy1', src: 'Pation2happy1.png' }, { name: 'Pation2happy2', src: 'Pation2happy2.png' },
-                    { name: 'patient3', src: 'patient3.png' }, { name: 'Pation3happy1', src: 'Pation3happy1.png' }, { name: 'Pation3happy2', src: 'Pation3happy2.png' },
-                    { name: 'boot', src: 'boot.png' }, { name: 'cage', src: 'cage.png' }, { name: 'dogfood', src: 'dogfood.png' },
-                    { name: 'cleaner', src: 'cleaner.png' }, { name: 'cleanerhappy', src: 'cleanerhappy.png' },
-                    { name: 'helper', src: 'helper.png' }, { name: 'helperhappy1', src: 'helperhappy1.png' }, { name: 'helperhappy2', src: 'helperhappy2.png' },
-                    { name: 'police', src: 'police.png' }, { name: 'policehappy', src: 'policehappy.png' },
-                    { name: 'boss1', src: 'boss1.png' }, { name: 'boss2', src: 'boss2.png' },
-                    { name: 'intruder_move', src: 'intruder_vehicle.png' }, { name: 'intruder_stop', src: 'intruder_vehicle1.png' },
-                    { name: 'vali', src: 'vali.png' }, { name: 'vali1', src: 'vali1.png' }, { name: 'valihappy', src: 'valihappy.png' }
-                ];
-                this.loadedCount = 0; this.complete = false;
-            }
-            loadAll(onComplete) {
-                if (this.toLoad.length === 0) { onComplete(); return; }
-                this.toLoad.forEach(item => {
-                    const img = new Image(); img.src = item.src;
-                    img.onload = () => { this.assets[item.name] = img; this.checkComplete(onComplete); };
-                    img.onerror = () => { log(`Yüklenemedi: ${item.src}`); this.assets[item.name] = null; this.checkComplete(onComplete); };
-                });
-            }
-            checkComplete(onComplete) {
-                if (this.complete) return;
-                this.loadedCount++;
-                const progress = (this.loadedCount / this.toLoad.length) * 100;
-                const fill = document.getElementById('loading-fill'); if(fill) fill.style.width = `${progress}%`;
-                if (this.loadedCount === this.toLoad.length) {
-                    this.complete = true; setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; onComplete(); }, 200);
-                }
-            }
-            get(name) { return this.assets[name]; }
-        }
-
-        class InputHandler {
-            constructor(canvas, camera) {
-                this.canvas = canvas; this.camera = camera; this.active = false; this.targetPos = { x: 0, y: 0 };
-                const start = (x, y) => { this.active = true; this.updateTarget(x, y); document.body.classList.add('clicking'); };
-                const move = (x, y) => { if (this.active) this.updateTarget(x, y); };
-                const end = () => { this.active = false; document.body.classList.remove('clicking'); };
-                window.addEventListener('mousedown', (e) => { if(e.target === this.canvas) start(e.clientX, e.clientY); });
-                window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
-                window.addEventListener('mouseup', end);
-                window.addEventListener('touchstart', (e) => { if(e.target === this.canvas) start(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
-                window.addEventListener('touchmove', (e) => { if(this.active) e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-                window.addEventListener('touchend', end);
-            }
-            updateTarget(sx, sy) { this.targetPos.x = sx + this.camera.x; this.targetPos.y = sy + this.camera.y; }
-            getInputVector(px, py) {
-                if (!this.active) return { x: 0, y: 0 };
-                const dx = this.targetPos.x - px; const dy = this.targetPos.y - py;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 10) return { x: 0, y: 0 };
-                return { x: dx / dist, y: dy / dist };
-            }
-        }
-
-        class Camera {
-            constructor(w, h) { this.x = 0; this.y = 0; this.width = w; this.height = h; }
-            follow(target, ww, wh) {
-                let tx = target.x - this.width / 2; let ty = target.y - this.height / 2;
-                tx = Math.max(0, Math.min(tx, ww - this.width)); ty = Math.max(0, Math.min(ty, wh - this.height));
-                this.x += (tx - this.x) * 0.1; this.y += (ty - this.y) * 0.1;
-            }
-        }
-
-        class Particle {
-            constructor(x, y, type = 'dust') {
-                this.x = x; this.y = y; this.type = type;
-                this.life = 1.0; 
-                if (type === 'dust') {
-                    this.x += (Math.random() - 0.5) * 20; this.y += (Math.random() - 0.5) * 10;
-                    this.vx = (Math.random() - 0.5) * 30; this.vy = (Math.random() - 1) * 30;
-                    this.size = Math.random() * 6 + 4;
-                    this.color = `rgba(200, 190, 170, ${this.life * 0.6})`;
-                } else {
-                    // Sparks
-                    this.vx = (Math.random() - 0.5) * 300; this.vy = (Math.random() - 0.5) * 300;
-                    this.size = Math.random() * 8 + 4;
-                    const colors = ['#FFD700', '#FF4444', '#44FF44', '#4444FF', '#FF00FF'];
-                    this.color = colors[Math.floor(Math.random()*colors.length)];
-                    this.life = 2.0;
-                }
-            }
-            update(dt) { 
-                this.x += this.vx * dt; this.y += this.vy * dt; this.life -= dt * 1.5; 
-                if (this.type === 'dust') this.size *= 0.95; 
-                else { this.vy += 200 * dt; } 
-            }
-            draw(ctx, cam) {
-                ctx.fillStyle = this.type === 'dust' ? `rgba(200, 190, 170, ${this.life * 0.6})` : this.color;
-                ctx.globalAlpha = Math.max(0, this.life);
-                ctx.beginPath(); ctx.arc(this.x - cam.x, this.y - cam.y, this.size, 0, Math.PI * 2); ctx.fill();
-                ctx.globalAlpha = 1.0;
-            }
-        }
-
-        class Entity {
-            constructor(x, y, w, h, asset) {
-                this.x = x; this.y = y; this.width = w; this.height = h; this.assetName = asset;
-                this.markedForDeletion = false; this.z = 0; this.facingLeft = false;
-                this.speechBubble = null; this.speechTimer = 0;
-                this.lastX = x; this.lastY = y; this.dustTimer = 0;
-                this.celebrationTarget = null;
-                this.willTalk = false; // For celebration
-            }
-            trackDust(particles, dt) {
-                const dist = Math.sqrt((this.x - this.lastX)**2 + (this.y - this.lastY)**2);
-                if (dist > 1) {
-                    this.dustTimer -= dt;
-                    if (this.dustTimer <= 0) { particles.push(new Particle(this.x, this.y + this.height/4, 'dust')); this.dustTimer = 0.1 + Math.random() * 0.1; }
-                }
-                this.lastX = this.x; this.lastY = this.y;
-            }
-            draw(ctx, assets, cam) {
-                const sx = this.x - cam.x; const sy = this.y - cam.y - this.z;
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath(); 
-                if (this.assetName === 'vehicle' || this.assetName.startsWith('intruder')) ctx.ellipse(sx, sy + 10 + this.z, this.width / 2, this.height / 6, 0, 0, Math.PI * 2); 
-                else ctx.ellipse(sx, sy + this.z, this.width / 2, this.height / 4, 0, 0, Math.PI * 2); 
-                ctx.fill();
-                ctx.save(); ctx.translate(sx, sy);
-                if (this.facingLeft && !this.assetName.startsWith('boss')) ctx.scale(-1, 1);
-                const img = assets.get(this.assetName);
-                if (img && img.width > 0) {
-                    if (this.isBossDog) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-50deg)';
-                    ctx.drawImage(img, -this.width / 2, -this.height, this.width, this.height);
-                    ctx.filter = 'none';
-                } else { 
-                    if (this.assetName.includes('player')) ctx.fillStyle = 'blue';
-                    else if (this.assetName.includes('vehicle')) ctx.fillStyle = '#555';
-                    else if (this.assetName.startsWith('intruder')) ctx.fillStyle = '#800'; 
-                    else if (this.assetName.includes('boss')) ctx.fillStyle = 'purple';
-                    else if (this.assetName.includes('dog')) ctx.fillStyle = 'orange';
-                    else if (this.assetName.includes('activist')) ctx.fillStyle = 'red';
-                    else if (this.assetName.includes('vali')) ctx.fillStyle = 'cyan';
-                    else ctx.fillStyle = 'green';
-                    ctx.fillRect(-this.width/2, -this.height, this.width, this.height);
-                }
-                ctx.restore();
-                if (this.speechBubble) this.drawBubble(ctx, sx, sy);
-            }
-            // ROUND RECT REPLACEMENT FOR COMPATIBILITY
-            drawBubble(ctx, x, y) {
-                const by = y - this.height - 20;
-                ctx.save(); ctx.font = '21px Arial'; ctx.textAlign = 'center';
-                const padding = 15; const tw = ctx.measureText(this.speechBubble).width;
-                const bw = tw + padding * 2; const bh = 45;
-                ctx.fillStyle = 'white'; ctx.strokeStyle = '#333'; ctx.lineWidth = 3;
-                
-                ctx.beginPath();
-                const r = 15; const lx = x - bw / 2; const ly = by - bh;
-                ctx.moveTo(lx + r, ly);
-                ctx.lineTo(lx + bw - r, ly);
-                ctx.quadraticCurveTo(lx + bw, ly, lx + bw, ly + r);
-                ctx.lineTo(lx + bw, ly + bh - r);
-                ctx.quadraticCurveTo(lx + bw, ly + bh, lx + bw - r, ly + bh);
-                ctx.lineTo(lx + r, ly + bh);
-                ctx.quadraticCurveTo(lx, ly + bh, lx, ly + bh - r);
-                ctx.lineTo(lx, ly + r);
-                ctx.quadraticCurveTo(lx, ly, lx + r, ly);
-                ctx.closePath();
-                ctx.fill(); ctx.stroke();
-
-                ctx.beginPath(); ctx.moveTo(x - 15, by); ctx.lineTo(x, by + 15); ctx.lineTo(x + 15, by); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#333'; ctx.fillText(this.speechBubble, x, by - bh / 2 + 8); ctx.restore();
-            }
-            distanceTo(other) { const dx = this.x - other.x; const dy = this.y - other.y; return Math.sqrt(dx * dx + dy * dy); }
-            showSpeechBubble(text, dur = 2) { this.speechBubble = text; this.speechTimer = dur; }
-            updateSpeech(dt) { if (this.speechBubble) { this.speechTimer -= dt; if (this.speechTimer <= 0) this.speechBubble = null; } }
-            
-            moveToTarget(dt, speed = 100) {
-                if (!this.celebrationTarget) return false;
-                const dx = this.celebrationTarget.x - this.x;
-                const dy = this.celebrationTarget.y - this.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist > 5) {
-                    this.x += (dx/dist) * speed * dt;
-                    this.y += (dy/dist) * speed * dt;
-                    this.facingLeft = dx < 0;
-                    this.z = Math.abs(Math.sin(Date.now()/150)) * 3;
-                    return false;
-                } else {
-                    this.x = this.celebrationTarget.x;
-                    this.y = this.celebrationTarget.y;
-                    this.z = 0;
-                    return true;
-                }
-            }
-        }
-
-        class Vali extends Entity {
-            constructor() {
-                super(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT+100, 80, 145, 'vali');
-                this.state = 'enter'; this.speed = 120; this.target = null;
-            }
-            update(dt, activists, ww, wh) {
-                this.updateSpeech(dt);
-                if (this.state === 'enter') {
-                    const dx = (ww/2) - this.x; const dy = (wh/2) - this.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist > 10) { this.x += (dx/dist)*this.speed*dt; this.y += (dy/dist)*this.speed*dt; }
-                    else { this.state = 'hunt'; }
-                } else if (this.state === 'hunt') {
-                    if (!this.target || this.target.markedForDeletion) {
-                        let min = 9999; this.target = null;
-                        activists.forEach(a => { if(!a.markedForDeletion) { const d = this.distanceTo(a); if(d < min){ min=d; this.target=a;} } });
-                    }
-                    if(this.target) {
-                        const dx = this.target.x - this.x; const dy = this.target.y - this.y;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        this.facingLeft = dx < 0;
-                        if(dist > 10) {
-                            this.x += (dx/dist)*this.speed*dt; this.y += (dy/dist)*this.speed*dt;
-                            this.assetName = 'vali1';
-                        } else {
-                            this.target.markedForDeletion = true;
-                            if(this.target.type === 1) this.showSpeechBubble(Math.random()>0.5?"Evinde besle":"Barınaktan sahiplen", 2);
-                            else this.showSpeechBubble(["Kontrolsüz beslemek yasak","Haşere, kemirgen popülasyonunu artırıyorsun","Ekolojik dengeyi bozmayın"][Math.floor(Math.random()*3)], 2);
-                            this.target = null;
-                        }
-                    } else {
-                        this.assetName = 'vali';
-                    }
-                }
-                if (this.state !== 'celebrate') this.z = this.assetName === 'vali1' ? Math.abs(Math.sin(Date.now()/150))*3 : 0;
-            }
-        }
-
-        class IntruderVehicle extends Entity {
-            constructor() { super(CONFIG.WORLD_WIDTH - 200, CONFIG.WORLD_HEIGHT, 360, 240, 'intruder_move'); this.state = 'enter'; this.targetX = CONFIG.WORLD_WIDTH - 350; this.targetY = CONFIG.WORLD_HEIGHT - 600; this.exitX = CONFIG.WORLD_WIDTH - 350; this.exitY = 1; this.timer = 60.0; this.dropTimer = 0; this.speed = 150; this.facingLeft = true; }
-            update(dt, ww, wh) {
-                if (this.state === 'enter') { this.assetName = 'intruder_move'; const dx = this.targetX - this.x; const dy = this.targetY - this.y; const dist = Math.sqrt(dx*dx + dy*dy); this.facingLeft = dx < 0; if (dist > 10) { this.x += (dx/dist) * this.speed * dt; this.y += (dy/dist) * this.speed * dt; } else { this.state = 'dump'; } }
-                else if (this.state === 'dump') { this.assetName = 'intruder_stop'; this.timer -= dt; this.dropTimer -= dt; if (this.dropTimer <= 0) { this.dropTimer = 1.0; return 'spawn_dog'; } if (this.timer <= 0) this.state = 'leave'; }
-                else if (this.state === 'leave') { this.assetName = 'intruder_move'; const dx = this.exitX - this.x; const dy = this.exitY - this.y; const dist = Math.sqrt(dx*dx + dy*dy); this.facingLeft = dx < 0; this.x += (dx/dist) * this.speed * dt; this.y += (dy/dist) * this.speed * dt; if (dist < 20) this.markedForDeletion = true; }
-                this.z = Math.abs(Math.sin(Date.now() / 200)) * 2;
-            }
-        }
-        class Dog extends Entity { constructor(x, y) { super(x, y, 65, 65, ['dog1', 'dog2', 'dog3'][Math.floor(Math.random()*3)]); this.isCollected = false; this.spawnPos = {x,y}; this.wanderTarget = {x,y}; this.wanderTimer = 0; this.state = 'wander'; this.speed = 50; this.perceptionRadius = 300; } update(dt, foods, civs, ww, wh) { if (this.isCollected) return; if (this.state === 'wander') { let closest = null, dist = this.perceptionRadius; foods.forEach(f => { const d = this.distanceTo(f); if (d < dist) { dist = d; closest = f; } }); if (closest) { this.state = 'eat'; this.targetEntity = closest; } else { let validCivs = []; civs.forEach(c => { if(this.distanceTo(c) < this.perceptionRadius) validCivs.push(c); }); if (validCivs.length > 0) { this.state = 'chase'; this.targetEntity = validCivs[Math.floor(Math.random() * validCivs.length)]; } else this.wander(dt); } } else if (this.state === 'eat' || this.state === 'chase') { if (!this.targetEntity || this.targetEntity.markedForDeletion) { this.state = 'wander'; return; } const d = this.distanceTo(this.targetEntity); const range = this.state === 'eat' ? 10 : 20; if (d > range) this.moveTo(this.targetEntity.x, this.targetEntity.y, dt); else if (this.state === 'eat') { this.eatTimer = (this.eatTimer || 0) + dt * 1000; if (this.eatTimer > CONFIG.FOOD_EAT_TIME) { this.eatTimer = 0; this.targetEntity.markedForDeletion = true; this.state = 'wander'; return 'multiply'; } } } if (this.x < CONFIG.BUILDING_BOUNDS.w && this.y < CONFIG.BUILDING_BOUNDS.h) { if (this.x < CONFIG.BUILDING_BOUNDS.w) this.x = CONFIG.BUILDING_BOUNDS.w + 10; if (this.y < CONFIG.BUILDING_BOUNDS.h) this.y = CONFIG.BUILDING_BOUNDS.h + 10; } } wander(dt) { this.wanderTimer -= dt; if (this.wanderTimer <= 0) { const a = Math.random() * Math.PI * 2, d = Math.random() * 100; this.wanderTarget = { x: this.spawnPos.x + Math.cos(a) * d, y: this.spawnPos.y + Math.sin(a) * d }; this.wanderTimer = 2 + Math.random() * 3; } this.moveTo(this.wanderTarget.x, this.wanderTarget.y, dt); } moveTo(tx, ty, dt) { const dx = tx - this.x, dy = ty - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 5) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 200)) * 5; } else this.z = 0; } }
-        class BossDog extends Dog { constructor(x, y) { super(x, y); this.width = 120; this.height = 120; this.speed = 225; this.isBossDog = true; this.perceptionRadius = 1500; } moveTo(tx, ty, dt) { const effectiveSpeed = (this.state === 'chase') ? 300 : this.speed; const dx = tx - this.x, dy = ty - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 5) { this.x += (dx / dist) * effectiveSpeed * dt; this.y += (dy / dist) * effectiveSpeed * dt; this.z = Math.abs(Math.sin(Date.now() / 200)) * 5; } else this.z = 0; } }
-        class Boss extends Entity { constructor(x, y, dropCount) { super(x, y, 155, 204, 'boss1'); this.speed = 225; this.dropCount = 0; this.maxDrops = dropCount || CONFIG.BOSS_DROPS_BASE; this.state = 'drop'; this.vx = 0; this.vy = 0; this.changeDirTimer = 0; this.dropTimer = 0; this.speechCooldown = 1.5; } update(dt, ww, wh) { this.updateSpeech(dt); this.speechCooldown -= dt; if (this.speechCooldown <= 0) { this.showSpeechBubble(["Kosmonota mı inanıyosun?", "Yiğin kuzucuklarım🤑🤑🤑", "😵‍💫🤪", "Kosmos sizi cennete almaz", "Benim 200 patili dostum var😎😎🤪", "🤪😬😵‍💫🥳🥳😱"][Math.floor(Math.random() * 6)], 2.0); this.speechCooldown = 2.0; } if (this.state === 'leave') { const tx = ww + 200; const dx = tx - this.x; const dy = wh/2 - this.y; const dist = Math.sqrt(dx*dx + dy*dy); this.x += (dx/dist) * this.speed * dt; this.y += (dy/dist) * this.speed * dt; if (dx > 0) this.assetName = 'boss1'; else this.assetName = 'boss2'; if (dist < 20) this.markedForDeletion = true; return; } this.changeDirTimer -= dt; if (this.changeDirTimer <= 0) { const a = Math.random() * Math.PI * 2; this.vx = Math.cos(a) * this.speed; this.vy = Math.sin(a) * this.speed; this.changeDirTimer = 2 + Math.random() * 2; } let nx = this.x + this.vx * dt; let ny = this.y + this.vy * dt; if (nx < CONFIG.BUILDING_BOUNDS.w && ny < CONFIG.BUILDING_BOUNDS.h) { this.vx *= -1; this.vy *= -1; nx = this.x; ny = this.y; } this.x = nx; this.y = ny; if (this.x < 0 || this.x > ww) { this.vx *= -1; this.x = Math.max(0, Math.min(this.x, ww)); } if (this.y < 0 || this.y > wh) { this.vy *= -1; this.y = Math.max(0, Math.min(this.y, wh)); } if (this.vx > 0) this.assetName = 'boss1'; else if (this.vx < 0) this.assetName = 'boss2'; this.z = Math.abs(Math.sin(Date.now() / 150)) * 5; this.dropTimer += dt; if (this.dropTimer > 1.0) { this.dropTimer = 0; this.dropCount++; if (this.dropCount >= this.maxDrops) this.state = 'leave'; return 'drop_boss_food'; } } }
-        class BossFood extends Entity { constructor(x, y) { super(x, y, 48, 48, 'dogfood'); this.timer = 2.0; } update(dt) { if (this.markedForDeletion) return; this.timer -= dt; if (this.timer <= 0) { this.markedForDeletion = true; return 'spawn_boss_dog'; } } }
-        class Player extends Entity { constructor(x, y) { super(x, y, 150, 130, 'player1'); this.speed = CONFIG.PLAYER_SPEED_BASE; this.maxCapacity = CONFIG.PLAYER_CAPACITY_BASE; this.stack = []; this.money = 0; this.isStunned = false; this.stunTimer = 0; this.animTimer = 0; } update(dt, vec, ww, wh) { this.updateSpeech(dt); if (this.isStunned) { this.stunTimer -= dt; if (this.stunTimer <= 0) this.isStunned = false; return; } if (vec.x !== 0 || vec.y !== 0) { this.assetName = 'player'; let nx = this.x + vec.x * this.speed * dt; let ny = this.y + vec.y * this.speed * dt; if (vec.x < 0) this.facingLeft = true; if (vec.x > 0) this.facingLeft = false; if (nx < CONFIG.BUILDING_BOUNDS.w && ny < CONFIG.BUILDING_BOUNDS.h) { if (this.x >= CONFIG.BUILDING_BOUNDS.w) nx = this.x; if (this.y >= CONFIG.BUILDING_BOUNDS.h) ny = this.y; } this.x = nx; this.y = ny; this.animTimer += dt * 10; this.z = Math.abs(Math.sin(this.animTimer)) * 5; } else { this.assetName = 'player1'; this.z = 0; this.animTimer = 0; } this.x = Math.max(32, Math.min(this.x, ww - 32)); this.y = Math.max(32, Math.min(this.y, wh - 32)); this.stack.forEach((d, i) => { const tz = (i + 1) * CONFIG.STACK_HEIGHT_OFFSET + this.z; d.x += (this.x - d.x) * 0.2; d.y += (this.y - d.y) * 0.2; d.z += (tz - d.z) * 0.2; d.facingLeft = this.facingLeft; }); } addToStack(d) { if (d.isBossDog) { if (this.stack.length > 0) return false; } if (this.stack.some(x => x.isBossDog)) return false; if (this.stack.length < this.maxCapacity) { this.stack.push(d); d.isCollected = true; return true; } return false; } removeFromStack() { return this.stack.pop(); } stun() { if (!this.isStunned) { this.isStunned = true; this.stunTimer = CONFIG.ACTIVIST_STUN_DURATION / 1000; if(this.stack.length>0){let d=this.stack.pop(); d.isCollected=false; return d;} } return null; } draw(ctx, assets, cam) { super.draw(ctx, assets, cam); this.stack.forEach(d => d.draw(ctx, assets, cam)); } }
-        class DogFood extends Entity { constructor(x, y) { super(x, y, 32, 32, 'dogfood'); } }
-        class Activist extends Entity { constructor(x, y, type) { let w = 125, h = 136; if(type === 2) { w = 100; h = 136; } super(x, y, w, h, type === 2 ? 'activist2' : 'activist'); this.type = type; this.vx = 0; this.vy = 0; this.changeDirTimer = 0; this.dropTimer = 0; } update(dt, ww, wh) { this.updateSpeech(dt); this.changeDirTimer -= dt; if (this.changeDirTimer <= 0) { const a = Math.random() * Math.PI * 2; this.vx = Math.cos(a) * CONFIG.ACTIVIST_SPEED; this.vy = Math.sin(a) * CONFIG.ACTIVIST_SPEED; this.changeDirTimer = 2 + Math.random() * 2; } let nx = this.x + this.vx * dt; let ny = this.y + this.vy * dt; if (this.vx < 0) this.facingLeft = true; else this.facingLeft = false; if (nx < CONFIG.BUILDING_BOUNDS.w && ny < CONFIG.BUILDING_BOUNDS.h) { this.vx *= -1; this.vy *= -1; nx = this.x; ny = this.y; } this.x = nx; this.y = ny; if (this.x < 0 || this.x > ww) { this.vx *= -1; this.x = Math.max(0, Math.min(this.x, ww)); } if (this.y < 0 || this.y > wh) { this.vy *= -1; this.y = Math.max(0, Math.min(this.y, wh)); } this.z = Math.abs(Math.sin(Date.now() / 150)) * 3; if (this.type === 2) { this.dropTimer += dt; if (this.dropTimer > 5) { this.dropTimer = 0; return 'drop_food'; } } } triggerSpeech() { this.showSpeechBubble(["Sizi şikayet edicem !!!", "Bu kanunlara aykırı !!!", "Köpeklere dokunma !!!"][Math.floor(Math.random() * 3)]); } }
-        class Activist3 extends Entity { constructor(x, y, van) { super(x, y, 95, 136, 'activist3'); this.van = van; this.state = 'sneak'; this.releaseTimer = 0; this.speed = 80; this.policeEscort = null; } update(dt, ww, wh) { this.updateSpeech(dt); if (this.state === 'arrested') { this.z = Math.abs(Math.sin(Date.now() / 150)) * 2; if (this.policeEscort) this.facingLeft = this.policeEscort.x < this.x; return; } if (this.state === 'sneak') { const dx = this.van.x - this.x, dy = this.van.y - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 50) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 200)) * 2; } else { this.state = 'release'; this.releaseTimer = 0; } } else if (this.state === 'release') { this.releaseTimer += dt; if (this.releaseTimer > 1) { this.releaseTimer = 0; return 'release_dog'; } } else if (this.state === 'flee') { const dx = this.x - this.van.x, dy = this.y - this.van.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist < 1000) { this.x += (dx / dist) * 160 * dt; this.y += (dy / dist) * 160 * dt; this.z = Math.abs(Math.sin(Date.now() / 100)) * 5; } else this.markedForDeletion = true; } this.x = Math.max(0, Math.min(this.x, ww)); this.y = Math.max(0, Math.min(this.y, wh)); } }
-        class Civilian extends Entity { constructor(x, y) { const vars = ['patient1', 'patient2', 'patient3']; const v = vars[Math.floor(Math.random() * vars.length)]; let w = 95, h = 136; if(v === 'patient2') { w = 70; h = 100; } else if(v === 'patient3') { w = 115; h = 136; } super(x, y, w, h, v); this.vx = (Math.random()-0.5)*50; this.vy = (Math.random()-0.5)*50; this.cd = 0; this.eatT = 0; this.beingEaten = false; } update(dt, ww, wh, dogs) { let near = 999, attackingDog = null; dogs.forEach(d => { if (!d.isCollected) { const dist = this.distanceTo(d); if (dist < near) { near = dist; attackingDog = d; } } }); if (near < 30) { this.beingEaten = true; let eatSpeed = 1.0; if (attackingDog && attackingDog.isBossDog) eatSpeed = 3.0; this.eatT += dt * 1000 * eatSpeed; this.vx = (Math.random()-0.5)*150; this.vy = (Math.random()-0.5)*150; if (this.eatT > CONFIG.CIVILIAN_EAT_TIME) { this.markedForDeletion = true; return 'died'; } } else { this.beingEaten = false; this.eatT = 0; this.cd -= dt; if (this.cd <= 0) { const a = Math.random() * Math.PI * 2; this.vx = Math.cos(a) * 50; this.vy = Math.sin(a) * 50; this.cd = 3 + Math.random() * 3; } } let nx = this.x + this.vx * dt; let ny = this.y + this.vy * dt; if (this.vx < 0) this.facingLeft = true; else this.facingLeft = false; if (nx < CONFIG.BUILDING_BOUNDS.w && ny < CONFIG.BUILDING_BOUNDS.h) { this.vx *= -1; this.vy *= -1; nx = this.x; ny = this.y; } this.x = Math.max(0, Math.min(nx, ww)); this.y = Math.max(0, Math.min(ny, wh)); this.z = Math.abs(Math.sin(Date.now() / 200)) * 2; } }
-        class Cleaner extends Entity { constructor(x, y) { super(x, y, 100, 136, 'cleaner'); this.target = null; this.normalSpeed = CONFIG.CLEANER_SPEED_NORMAL; this.fastSpeed = CONFIG.CLEANER_SPEED_FAST; this.speed = this.normalSpeed; this.busyTimer = 0; } update(dt, foods, bossFoods) { if (this.busyTimer > 0) { this.busyTimer -= dt; this.z = 0; return; } if (this.target && this.target.markedForDeletion) this.target = null; if (!this.target) { let d = 9999; if (bossFoods && bossFoods.length > 0) { bossFoods.forEach(f => { if (!f.markedForDeletion) { const dist = this.distanceTo(f); if (dist < d) { d = dist; this.target = f; } } }); } if (!this.target) { foods.forEach(f => { if (!f.markedForDeletion) { const dist = this.distanceTo(f); if (dist < d) { d = dist; this.target = f; } } }); } } if (this.target) { this.speed = (this.target instanceof BossFood) ? this.fastSpeed : this.normalSpeed; const dx = this.target.x - this.x; const dy = this.target.y - this.y; const dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 10) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 150)) * 3; } else { const isBossFood = this.target instanceof BossFood; this.target.markedForDeletion = true; this.target = null; if (isBossFood) this.busyTimer = 4.0; } } else { this.z = 0; } } }
-        class Helper extends Entity { constructor(x, y) { super(x, y, 120, 120, 'helper'); this.speed = 250; this.stack = []; this.maxCapacity = CONFIG.HELPER_CAPACITY; this.state = 'find'; this.target = null; this.van = null; } update(dt, dogs, van, ww, wh) { this.van = van; if (this.target && this.target instanceof Dog && this.target.isCollected) this.target = null; const isFull = this.stack.length >= this.maxCapacity || this.stack.some(d => d.isBossDog); if (this.state === 'find') { if (isFull) { this.state = 'return'; this.target = this.van; } else if (!this.target) { let min = 9999; dogs.forEach(d => { if (!d.isCollected) { if (d.isBossDog && this.stack.length > 0) return; const dist = this.distanceTo(d); if (dist < min) { min = dist; this.target = d; } } }); if (!this.target) { this.state = 'return'; this.target = this.van; } } } else if (this.state === 'return') { if (this.stack.length === 0) { this.state = 'find'; this.target = null; } else this.target = this.van; } if (this.target) { const dx = this.target.x - this.x, dy = this.target.y - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 10) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 150)) * 5; } else { if (this.state === 'find' && this.target instanceof Dog) { if (!this.target.isCollected) { let canCarry = true; if (this.target.isBossDog && this.stack.length > 0) canCarry = false; if (this.stack.some(x => x.isBossDog)) canCarry = false; if (canCarry) { this.stack.push(this.target); this.target.isCollected = true; this.target = null; if (this.stack.some(x => x.isBossDog)) { this.state = 'return'; this.target = this.van; } } else { this.target = null; this.showSpeechBubble("Ağır!", 1); } } } else if (this.state === 'return' && this.target === this.van && this.stack.length > 0) { this.stack.pop(); return 'deposit'; } } } this.stack.forEach((d, i) => { const tz = (i + 1) * CONFIG.STACK_HEIGHT_OFFSET + this.z; d.x += (this.x - d.x) * 0.2; d.y += (this.y - d.y) * 0.2; d.z += (tz - d.z) * 0.2; d.facingLeft = this.facingLeft; }); } draw(ctx, assets, cam) { super.draw(ctx, assets, cam); this.stack.forEach(d => d.draw(ctx, assets, cam)); } }
-        class Police extends Entity { constructor(x, y) { super(x, y, 90, 136, 'police'); this.speed = 170; this.state = 'patrol'; this.target = null; this.exitPoint = { x: 0, y: 0 }; this.cd = 0; this.home = { x: x, y: y }; } update(dt, a3List, ww, wh) { this.updateSpeech(dt); if (this.state === 'cooldown') { this.cd -= dt; if (this.cd <= 0) this.state = 'return'; return; } if (this.state === 'escort') { if (this.target) { const dx = this.exitPoint.x - this.x, dy = this.exitPoint.y - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 150)) * 5; const off = this.facingLeft ? 40 : -40; this.target.x = this.x + off; this.target.y = this.y; this.target.z = this.z; if (dist < 20) { this.target.markedForDeletion = true; this.target = null; this.state = 'cooldown'; this.cd = 10 + Math.random() * 5; } } else this.state = 'return'; return; } if (this.state === 'return') { const dx = this.home.x - this.x, dy = this.home.y - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 10) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 150)) * 5; } else this.state = 'patrol'; return; } let min = 9999; let pot = null; a3List.forEach(a => { if (!a.markedForDeletion && a.state !== 'flee' && a.state !== 'arrested') { const d = this.distanceTo(a); if (d < min) { min = d; pot = a; } } }); this.target = pot; if (this.target) { this.state = 'chase'; const dx = this.target.x - this.x, dy = this.target.y - this.y, dist = Math.sqrt(dx*dx + dy*dy); if (dx < 0) this.facingLeft = true; else this.facingLeft = false; if (dist > 30) { this.x += (dx / dist) * this.speed * dt; this.y += (dy / dist) * this.speed * dt; this.z = Math.abs(Math.sin(Date.now() / 150)) * 5; } else { this.state = 'escort'; this.target.state = 'arrested'; this.target.policeEscort = this; this.target.showSpeechBubble("Bu yasal diilll !!!", 3); const dl = this.x, dr = ww - this.x, dt_ = this.y, db = wh - this.y; const m = Math.min(dl, dr, dt_, db); if (m === dl) this.exitPoint = { x: -100, y: this.y }; else if (m === dr) this.exitPoint = { x: ww + 100, y: this.y }; else if (m === dt_) this.exitPoint = { x: this.x, y: -100 }; else this.exitPoint = { x: this.x, y: wh + 100 }; } } else { this.state = 'patrol'; this.z = 0; } } }
-
-        class Game {
-            constructor() {
-                this.canvas = document.getElementById('gameCanvas'); this.ctx = this.canvas.getContext('2d');
-                this.assets = new AssetManager(); this.camera = new Camera(this.canvas.width, this.canvas.height);
-                this.input = new InputHandler(this.canvas, this.camera);
-                this.player = new Player(CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2);
-                this.van = new Entity(CONFIG.WORLD_WIDTH / 2 - 100, CONFIG.WORLD_HEIGHT / 2 + 100, 360, 240, 'vehicle');
-                this.dogs = []; this.activists = []; this.a3List = []; this.food = []; this.civs = []; this.cleaners = []; this.helpers = []; this.police = [];
-                this.bossList = []; this.bossFood = []; this.intruderList = []; this.valiList = []; // VALI LIST
-                this.particles = []; this.lastTime = 0; this.spawnT = 0; this.depT = 0; this.capUp = 0; this.spdUp = 0; this.hlpUp = 0; this.clnUp = 0; this.a3T = 0; 
-                this.wave = 0; this.bossTimer = 0; this.nextWaveTime = 20; this.totalTime = 0; this.bossWave = 0; this.intruderWave = 0;
-                this.bossActive = false; this.civsSpawnedForWave = false; this.intruderSpawned = false; this.pandemicActive = false; this.pandemicTimer = 0;
-                this.wave3Cleared = false; this.valiTimer = 0; this.valiAlertShown = false; this.valiActive = false; this.gameOver = false; this.celebrationActive = false; this.celebrationTimer = 25;
-                
-                const restartBtn = document.getElementById('restart-btn'); 
-                if(restartBtn) restartBtn.onclick = () => { localStorage.clear(); location.reload(); };
-                
-                // MAIN MENU HANDLING
-                const menu = document.getElementById('main-menu');
-                const playBtn = document.getElementById('play-btn');
-                const loading = document.getElementById('loading-screen');
-                const infoBtn = document.getElementById('info-btn');
-                const howTo = document.getElementById('how-to-play');
-
-                // SOUND MANAGER
-                this.soundManager = new SoundManager();
-                this.soundManager.loadSounds();
-
-                // HOW TO PLAY SLIDER LOGIC
-                const characters = [
-                    { 
-                        images: ['background.jpg'], // Background for slide 1
-                        title: "Genel Kurallar", 
-                        desc: `🐕 Topla ve Getir: Sokaktaki başıboş köpeklerin yanına giderek onları yakala ve ortadaki Minibüse (Barınağa) götür.
-
-💰 Para Kazan: Barınağa teslim ettiğin her köpek için bütçe kazanırsın.
-
-🚑 Vatandaşı Koru: Hastalar ve yaşlılar risk altında! Eğer bir vatandaş saldırıya uğrarsa paran azalır.
-
-🍖 Çoğalmayı Önle: Köpeklerin çoğalmaması için kontrolsüz beslenmeyi engelle ve yemek artıklarını topla.
-
-⚠️ Tehlikeler:
-Aktivistler: Yere mama dökerek veya köpekleri serbest bırakarak işini zorlaştırırlar.
-Komşu İlçe Aracı: Şehre kaçak köpek bırakmaya gelir.
-Patron (Boss): Devasa köpek sürüleri ile gelen tehlike!
-
-🛠️ Güçlen: Kazandığın parayla Nalbur'dan Hız, Kapasite, Temizlikçi, Yakalama Timi ve Polis desteği al.
-
-⏳ Zamana Karşı: Belirli sürelerde çıkan "Salgın Tehlikesi" uyarısına dikkat et. Süre bitmeden Patron köpekleri temizlemezsen oyunu kaybedersin!
-
-🏆 Hedef: "The Vali" şehre gelene kadar düzeni sağla ve Kocaeli halkını kurtar!
-
-Oyunun Amacı
-Kocaeli Muharebesi, sokak hayvanlarının kontrolsüz çoğalmasının yarattığı zorluklara ve toplum sağlığı üzerindeki etkilerine dikkat çeken bir simülasyondur.
-
-Görevin: Umuttepe yerleşkesinde bozulan kamu düzenini yeniden sağlamak. Hem vatandaşların güvenliğini korumalı hem de sokak hayvanlarını toplayarak onları güvenli bölgeye (barınağa) ulaştırmalısın. Dışarıdan gelen müdahalelere, mama kirliliğine ve kaçak köpek bırakımlarına karşı şehri savun!`
-                    },
-                    { images: ['playerhappy2.png'], title: "Umuttepe Gladyatörü (Siz)", desc: "Elinde file, kalbinde hizmet aşkı. Tek derdi köpekleri güvenli yere götürmek ama herkes ona 'kötü adam' muamelesi yapıyor." },
-                    { images: ['dog1.png', 'dog2.png', 'dog3.png'], title: "Kampüs Sakini", desc: "Derslerden kalan, vizelerden bunalan öğrenci dostu. Sevimlidir ama acıkınca gözü döner, 'Köfte nerede?' diye seni kovalayabilir." },
-                    { images: ['dog1.png', 'dog2.png', 'dog3.png'], customClass: 'boss-dog-style', title: "Arnold 'Hav'zenegger", desc: "Bu köpek mama değil, protein tozuyla beslenmiş. Isırmaz, direkt kafa atar. Kaçsan iyi edersin." },
-                    { images: ['activist.png'], title: "Telefonlu Teyze", desc: "Süper gücü: 7/24 canlı yayın açıp seni şikayet etmek. Yanına yaklaşırsan kulakların çınlar, seni dondurur." },
-                    { images: ['activist2.png'], title: "Mama Saçan", desc: "Yere dökülen her mamanın arkasındaki isim. Doğayı sevdiğini sanır ama aslında fareleri ve haşereleri besliyordur." },
-                    { images: ['activist3.png'], title: "Anarşist Karen", desc: "Minibüsüyle gizlice yanaşır, binbir emekle topladığın köpekleri geri salar. Tam bir baş belası." },
-                    { images: ['boss1.png'], title: "Rant Baronu", desc: "Kaosun mimarı. Köpekler çoğaldıkça onun cebi doluyor. Uzaktan pis pis sırıtır ve sürekli mama paketleri fırlatarak ortalığı karıştırır." },
-                    { images: ['intruder_vehicle.png'], title: "Beleşçi Nakliyat", desc: "'Bizim ilçede yer kalmadı, biraz da siz bakın' diyip köpekleri sizin bölgeye yıkan o hain kamyonet." },
-                    { images: ['patient1.png', 'patient2.png', 'patient3.png'], title: "Umuttepe Yolcusu", desc: "Soğuk, yokuş ve rüzgar yetmezmiş gibi bir de köpeklerle uğraşan garibanlar. Onları koru, ısırılırlarsa tazminatı cebinden ödersin!" },
-                    { images: ['cleanerhappy.png'], title: "Süpürge Reis", desc: "Gizli Kahraman. Yerdeki mamaları ışık hızıyla temizler. O olmasa ortalık mama dağından geçilmezdi." },
-                    { images: ['helperhappy2.png'], title: "Kankalar", desc: "Sen yorulunca devreye giren, 'Biz hallederiz abi' diyen o güvenilir ekip. Arkanda onlar varken sırtın yere gelmez." },
-                    { images: ['policehappy.png'], title: "Adalet Yumruğu", desc: "Anarşist Karen'ların korkulu rüyası. Kelepçeyi taktığı gibi paketler, geldiği yere gönderir. Huzurun teminatı." },
-                    { images: ['valihappy.png'], title: "The Vali (Big Boss)", desc: "O geldiğinde akan sular durur. Köpekler hizaya girer, aktivistler buharlaşır. Oyunun nihai kurtarıcısı." }
-                ];
-
-                let currentSlide = 0;
-                const slideImgContainer = document.getElementById('slide-img-container');
-                const slideTitle = document.getElementById('slide-title');
-                const slideDesc = document.getElementById('slide-desc');
-                
-                function updateSlide(index) {
-                    if (index < 0) currentSlide = characters.length - 1;
-                    else if (index >= characters.length) currentSlide = 0;
-                    else currentSlide = index;
-
-                    const char = characters[currentSlide];
-                    
-                    // Clear previous images
-                    slideImgContainer.innerHTML = '';
-                    
-                    // Reset Background (only slide 0 uses image bg)
-                    if (currentSlide === 0) { 
-                        document.getElementById('how-to-play').style.backgroundImage = `url('${char.images[0]}')`;
-                        document.getElementById('how-to-play').style.backgroundSize = 'cover';
-                        document.getElementById('how-to-play').style.backgroundBlendMode = 'multiply';
-                        document.getElementById('how-to-play').style.backgroundColor = 'rgba(0,0,0,0.8)';
-                    } else {
-                        document.getElementById('how-to-play').style.background = 'rgba(0, 0, 0, 0.95)';
-                        document.getElementById('how-to-play').style.backgroundImage = 'none';
-
-                        // Add images for this character
-                        if(char.images) {
-                            char.images.forEach(imgSrc => {
-                                const img = document.createElement('img');
-                                img.src = imgSrc;
-                                img.className = 'slide-img-item';
-                                if (char.customClass) img.classList.add(char.customClass);
-                                slideImgContainer.appendChild(img);
-                            });
-                        }
-                    }
-                    
-                    slideTitle.innerText = char.title;
-                    slideDesc.innerHTML = char.desc; // Use innerHTML for <br> tags if needed
-                }
-
-                infoBtn.onclick = () => { 
-                    howTo.style.display = 'flex'; 
-                    updateSlide(0);
-                };
-
-                document.getElementById('htp-close').onclick = () => { howTo.style.display = 'none'; };
-                document.getElementById('prev-slide').onclick = () => { updateSlide(currentSlide - 1); };
-                document.getElementById('next-slide').onclick = () => { updateSlide(currentSlide + 1); };
-
-
-                this.uiMoney = document.getElementById('money-val'); this.uiCap = document.getElementById('capacity-val');
-                const fsBtn = document.getElementById('fullscreen-btn'); if (fsBtn) { fsBtn.addEventListener('click', () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.log(err)); } else { if (document.exitFullscreen) document.exitFullscreen(); } }); }
-                this.setupUI(); this.resize(); window.addEventListener('resize', () => this.resize());
-                
-                // NEW FLOW: Load -> Show Menu -> Click Play -> Start Loop
-                this.assets.loadAll(() => { 
-                    document.getElementById('icon-speed').src = this.assets.get('boot')?.src || ''; 
-                    document.getElementById('icon-capacity').src = this.assets.get('cage')?.src || ''; 
-                    document.getElementById('icon-cleaner').src = this.assets.get('cleaner')?.src || ''; 
-                    document.getElementById('icon-helper').src = this.assets.get('helper')?.src || ''; 
-                    document.getElementById('icon-police').src = this.assets.get('police')?.src || '';
-                    document.getElementById('hud-capacity-icon').src = this.assets.get('cage')?.src || ''; // Set HUD Cage Icon
-
-                    // Init world entities
-                    this.initWorld(); 
-                    
-                    // Show Menu instead of starting loop
-                    loading.style.display = 'none';
-                    menu.style.display = 'flex';
-                    
-                    // Play Main Menu Music on interaction (browser policy)
-                    document.body.addEventListener('click', () => {
-                        if (menu.style.display === 'flex' && this.soundManager.currentTrackName !== 'Mainmenu') {
-                            this.soundManager.playLoop('Mainmenu');
-                        }
-                    }, { once: true });
-
-                    playBtn.onclick = () => {
-                        menu.style.display = 'none';
-                        document.getElementById('ui-layer').style.display = 'block';
-                        // Switch to Game Music
-                        this.soundManager.playMusicSequence('gamestart1', 'gamestart2');
-                        // START GAME LOOP
-                        requestAnimationFrame((t) => this.loop(t)); 
-                    };
-                });
-            }
-            setupUI() { const modal = document.getElementById('upgrade-modal'); document.getElementById('nalbur-btn').onclick = () => { modal.style.display = 'flex'; this.updUI(); }; document.querySelector('.close-btn').onclick = () => modal.style.display = 'none'; window.onclick = (e) => { if(e.target == modal) modal.style.display = 'none'; }; document.getElementById('btn-speed').onclick = () => { if(this.player.money >= CONFIG.UPGRADE_COST_SPEED) { this.player.money -= CONFIG.UPGRADE_COST_SPEED; this.player.speed += 50; CONFIG.UPGRADE_COST_SPEED = Math.floor(CONFIG.UPGRADE_COST_SPEED * 1.5); this.spdUp++; this.saveGame(); this.updUI(); }}; document.getElementById('btn-capacity').onclick = () => { if(this.player.money >= CONFIG.UPGRADE_COST_CAPACITY) { this.player.money -= CONFIG.UPGRADE_COST_CAPACITY; this.player.maxCapacity++; CONFIG.UPGRADE_COST_CAPACITY = Math.floor(CONFIG.UPGRADE_COST_CAPACITY * 1.5); this.capUp++; this.saveGame(); this.updUI(); }}; document.getElementById('btn-cleaner').onclick = () => { if(this.player.money >= CONFIG.UPGRADE_COST_CLEANER) { this.player.money -= CONFIG.UPGRADE_COST_CLEANER; this.cleaners.push(new Cleaner(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_CLEANER = Math.floor(CONFIG.UPGRADE_COST_CLEANER * 1.5); this.clnUp++; this.saveGame(); this.updUI(); }}; document.getElementById('btn-helper').onclick = () => { if(this.player.money >= CONFIG.UPGRADE_COST_HELPER) { this.player.money -= CONFIG.UPGRADE_COST_HELPER; this.helpers.push(new Helper(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_HELPER = Math.floor(CONFIG.UPGRADE_COST_HELPER * 1.5); this.hlpUp++; CONFIG.DOG_SPAWN_INTERVAL *= 0.8; this.saveGame(); this.updUI(); }}; document.getElementById('btn-police').onclick = () => { if(this.player.money >= CONFIG.UPGRADE_COST_POLICE) { this.player.money -= CONFIG.UPGRADE_COST_POLICE; this.police.push(new Police(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_POLICE = Math.floor(CONFIG.UPGRADE_COST_POLICE * 1.5); this.saveGame(); this.updUI(); }}; }
-            updUI() { ['speed','capacity','cleaner','helper','police'].forEach(k => { document.getElementById(`price-${k}`).innerText = `₺${CONFIG[`UPGRADE_COST_${k.toUpperCase()}`]}`; const btn = document.getElementById(`btn-${k}`); if(this.player.money < CONFIG[`UPGRADE_COST_${k.toUpperCase()}`]) btn.classList.add('disabled'); else btn.classList.remove('disabled'); }); this.uiMoney.innerText = this.player.money; }
-            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; if(this.camera) { this.camera.width = this.canvas.width; this.camera.height = this.canvas.height; } }
-            initWorld() { for(let i=0; i<CONFIG.ACTIVIST_COUNT; i++) this.spawnActivist(i%2===0?1:2); for(let i=0; i<10; i++) this.spawnDog(); for(let i=0; i<5; i++) this.spawnCiv(); }
-            saveGame() { const data = { money: this.player.money, spdUp: this.spdUp, capUp: this.capUp, clnUp: this.clnUp, hlpUp: this.hlpUp, polUp: this.police.length }; localStorage.setItem('kocaeli_save', JSON.stringify(data)); }
-            loadGame() { const saved = localStorage.getItem('kocaeli_save'); if (saved) { const data = JSON.parse(saved); this.player.money = data.money || 0; this.spdUp = data.spdUp || 0; this.capUp = data.capUp || 0; this.clnUp = data.clnUp || 0; this.hlpUp = data.hlpUp || 0; const polCount = data.polUp || 0; for(let i=0; i<this.spdUp; i++) { this.player.speed += 50; CONFIG.UPGRADE_COST_SPEED = Math.floor(CONFIG.UPGRADE_COST_SPEED * 1.5); } for(let i=0; i<this.capUp; i++) { this.player.maxCapacity++; CONFIG.UPGRADE_COST_CAPACITY = Math.floor(CONFIG.UPGRADE_COST_CAPACITY * 1.5); } for(let i=0; i<this.clnUp; i++) { this.cleaners.push(new Cleaner(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_CLEANER = Math.floor(CONFIG.UPGRADE_COST_CLEANER * 1.5); } for(let i=0; i<this.hlpUp; i++) { this.helpers.push(new Helper(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_HELPER = Math.floor(CONFIG.UPGRADE_COST_HELPER * 1.5); CONFIG.DOG_SPAWN_INTERVAL *= 0.8; } for(let i=0; i<polCount; i++) { this.police.push(new Police(CONFIG.WORLD_WIDTH/2, CONFIG.WORLD_HEIGHT/2)); CONFIG.UPGRADE_COST_POLICE = Math.floor(CONFIG.UPGRADE_COST_POLICE * 1.5); } } }
-            spawnActivist(t) { let x,y,d; do { x=Math.random()*CONFIG.WORLD_WIDTH; y=Math.random()*CONFIG.WORLD_HEIGHT; const dx=x-CONFIG.WORLD_WIDTH/2; const dy=y-CONFIG.WORLD_HEIGHT/2; d=Math.sqrt(dx*dx+dy*dy); } while(d<CONFIG.SAFE_ZONE_RADIUS || (x<CONFIG.BUILDING_BOUNDS.w && y<CONFIG.BUILDING_BOUNDS.h)); this.activists.push(new Activist(x,y,t)); }
-            spawnA3() { const a=Math.random()*Math.PI*2; this.a3List.push(new Activist3(CONFIG.WORLD_WIDTH/2+Math.cos(a)*800, CONFIG.WORLD_HEIGHT/2+Math.sin(a)*800, this.van)); }
-            spawnBoss(dropCount) { const a=Math.random()*Math.PI*2; this.bossList.push(new Boss(CONFIG.WORLD_WIDTH/2+Math.cos(a)*800, CONFIG.WORLD_HEIGHT/2+Math.sin(a)*800, dropCount)); const alertBox = document.getElementById('boss-alert'); if(alertBox) { alertBox.innerText = `Patron Geliyor !!! ${this.bossWave}. Dalga`; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 4000); } }
-            spawnIntruder() { this.intruderList.push(new IntruderVehicle()); const alertBox = document.getElementById('boss-alert'); if(alertBox) { alertBox.innerText = "Komşu İlçe Aracı Geldi!"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 4000); } }
-            spawnVali() { this.valiList.push(new Vali()); this.valiActive = true; }
-            
-            triggerGameOver() { 
-                this.gameOver = true; 
-                // Stop music and play game over sound (optional, but loop logic needs stop)
-                this.soundManager.playLoop('bosswave1_1'); 
-
-                const el = document.getElementById('game-screen-overlay'); // Use common overlay
-                if(el) { 
-                    el.style.display = 'flex'; 
-                    el.style.background = 'rgba(180, 0, 0, 0.8)'; // DARK RED
-                    document.getElementById('overlay-title').innerHTML = "Kuduz Salgını Başladı<br>Oyunu Kaybettiniz!";
-                }
-            }
-            triggerWin() { 
-                this.gameOver = true; 
-                // Keep Vali music playing (handled in loop)
-
-                const el = document.getElementById('game-screen-overlay'); // Use common overlay
-                if(el) { 
-                    el.style.display = 'flex'; 
-                    el.style.background = 'rgba(0, 180, 0, 0.8)'; // DARK GREEN
-                    document.getElementById('overlay-title').innerHTML = "Tebrikler<br>Kocaeli Halkını Kurtardınız !!!";
-                }
-            }
-
-            startPandemic() { this.pandemicActive = true; if (this.bossWave === 1) this.pandemicTimer = 60; else if (this.bossWave === 2) this.pandemicTimer = 45; else if (this.bossWave === 3) this.pandemicTimer = 30; document.getElementById('pandemic-hud').style.display = 'block'; }
-            spawnDog(x,y) { if(this.valiActive) { const bad = this.activists.filter(a => a.type===2); if(bad.length===0) return; } if(this.dogs.length>=CONFIG.MAX_DOGS) return; if(!x) { do { x=Math.random()*CONFIG.WORLD_WIDTH; y=Math.random()*CONFIG.WORLD_HEIGHT; const dx=x-CONFIG.WORLD_WIDTH/2; const dy=y-CONFIG.WORLD_HEIGHT/2; if(Math.sqrt(dx*dx+dy*dy)<CONFIG.SAFE_ZONE_RADIUS || (x<CONFIG.BUILDING_BOUNDS.w && y<CONFIG.BUILDING_BOUNDS.h)) x=null; } while(!x); } this.dogs.push(new Dog(x,y)); }
-            spawnCiv() { let x,y; do { x=Math.random()*CONFIG.WORLD_WIDTH; y=Math.random()*CONFIG.WORLD_HEIGHT; } while(x<CONFIG.BUILDING_BOUNDS.w && y<CONFIG.BUILDING_BOUNDS.h); this.civs.push(new Civilian(x,y)); }
-
-            startCelebration() {
-                this.celebrationActive = true;
-                this.dogs = []; this.activists = []; this.food = [];
-                
-                // CLEAR OLD BUBBLES
-                this.player.speechBubble = null;
-                if(this.valiList.length > 0) this.valiList[0].speechBubble = null;
-
-                const cx = CONFIG.WORLD_WIDTH / 2; const cy = CONFIG.WORLD_HEIGHT / 2; const vanY = this.van.y;
-                const civY = vanY + 150;
-                this.civs.forEach((c, i) => {
-                    c.celebrationTarget = { x: cx + (i - this.civs.length/2) * 80, y: civY };
-                    if(c.assetName.includes('patient1')) c.happyAsset = 'Pation1happy1';
-                    else if(c.assetName.includes('patient2')) c.happyAsset = 'Pation2happy1';
-                    else c.happyAsset = 'Pation3happy1';
-                    c.idleAsset = c.happyAsset.replace('1','2');
-                    c.willTalk = Math.random() < 0.5; // 50% Chance to talk
-                });
-                const staffY = civY + 120;
-                const staff = [...this.police, ...this.cleaners, ...this.helpers];
-                staff.forEach((s, i) => {
-                    s.celebrationTarget = { x: cx + (i - staff.length/2) * 90, y: staffY };
-                    if(s.assetName === 'police') s.happyAsset = 'policehappy';
-                    else if(s.assetName === 'cleaner') s.happyAsset = 'cleanerhappy';
-                    else if(s.assetName === 'helper') { s.happyAsset = 'helperhappy1'; s.idleAsset = 'helperhappy2'; }
-                    s.willTalk = Math.random() < 0.5; // 50% Chance to talk
-                });
-                const heroY = staffY + 120;
-                if(this.valiList.length > 0) {
-                    this.valiList[0].celebrationTarget = { x: cx - 60, y: heroY };
-                    this.valiList[0].happyAsset = 'vali1'; this.valiList[0].idleAsset = 'valihappy';
-                }
-                this.player.celebrationTarget = { x: cx + 60, y: heroY };
-                this.player.happyAsset = 'playerhappy1'; this.player.idleAsset = 'playerhappy2';
-            }
-
-            loop(t) {
-                try {
-                    if (this.gameOver) return;
-                    const dt = Math.min((t - this.lastTime) / 1000, 0.1); this.lastTime = t;
-
-                    if (this.celebrationActive) {
-                        this.camera.follow({x:CONFIG.WORLD_WIDTH/2, y:CONFIG.WORLD_HEIGHT/2}, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-                        
-                        // Use a single loop to update speech for everyone
-                        const celebrationEntities = [...this.civs, ...this.police, ...this.cleaners, ...this.helpers, ...this.valiList, this.player];
-                        
-                        celebrationEntities.forEach(e => {
-                            e.updateSpeech(dt); // IMPORTANT: Tick timer so bubble expires
-
-                            if(e.celebrationTarget) {
-                                const arrived = e.moveToTarget(dt);
-                                if(arrived) {
-                                    e.assetName = e.idleAsset || e.happyAsset; 
-                                    
-                                    // GUARANTEED SPEECH FOR HEROES
-                                    if (e instanceof Vali && !e.speechBubble) e.showSpeechBubble("🏅", 5);
-                                    else if (e instanceof Player && !e.speechBubble) e.showSpeechBubble("Çalışınca oluyor", 5);
-
-                                    // RANDOM REPEATING SPEECH FOR OTHERS
-                                    else if(e.willTalk && !e.speechBubble) {
-                                        if(e instanceof Civilian) e.showSpeechBubble(["Helal olsun !!!", "😊", "❤️", "🤗🤗", "Teşekkürler !!!", "Oh bee !!!", "🥳🥳🎉", "Allah razı olsun"][Math.floor(Math.random()*8)], 2);
-                                        else if(e instanceof Police || e instanceof Cleaner || e instanceof Helper) e.showSpeechBubble(["İşimiz", "Eyvallah", "🙏"][Math.floor(Math.random()*3)], 2);
-                                    }
-                                } else { e.assetName = e.happyAsset; }
-                            }
-                        });
-                        if(Math.random() < 0.3) this.particles.push(new Particle(CONFIG.WORLD_WIDTH/2 + (Math.random()-0.5)*800, CONFIG.WORLD_HEIGHT/2 + (Math.random()-0.5)*600, 'spark'));
-                        this.celebrationTimer -= dt;
-                        if(this.celebrationTimer <= 0) this.triggerWin();
-
-                    } else {
-                        this.spawnT += dt * 1000; if (this.spawnT > CONFIG.DOG_SPAWN_INTERVAL) { this.spawnDog(); this.spawnT = 0; }
-                        if (this.capUp >= 2) { this.a3T -= dt; if (this.a3T <= 0 && !this.valiActive) { this.spawnA3(); this.a3T = 10 + Math.random() * 10; } }
-                        this.totalTime += dt;
-                        if (this.totalTime >= 300 && this.intruderWave < 1) {
-                            this.spawnIntruder();
-                            this.intruderWave = 1;
-                            this.soundManager.playMusicSequence('intruder_vehiclewave1_1', 'intruder_vehiclewave1_2');
-                        }
-                        if (this.totalTime >= 600 && this.intruderWave < 2) {
-                            this.spawnIntruder();
-                            this.intruderWave = 2;
-                            this.soundManager.playMusicSequence('intruder_vehiclewave2_1', 'intruder_vehiclewave2_2');
-                        }
-
-                        // BOSS WAVES (Time based)
-                        // Wave 1: 14 mins (840s)
-                        if (this.bossWave < 1) {
-                            if (this.totalTime >= 830 && !this.civsSpawnedForWave) {
-                                for(let i=0; i<10; i++) this.spawnCiv();
-                                const alertBox = document.getElementById('boss-alert');
-                                if(alertBox) { alertBox.innerText = "Kargaşa"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 3000); }
-                                this.civsSpawnedForWave = true;
-                            }
-                            if (this.totalTime >= 840) {
-                                this.bossWave = 1;
-                                this.spawnBoss(CONFIG.BOSS_DROPS_BASE);
-                                this.bossActive = true;
-                                this.civsSpawnedForWave = false;
-                                this.soundManager.playMusicSequence('bosswave1_1', 'bosswave1_2');
-                            }
-                        }
-                        // Wave 2: 17 mins (1020s)
-                        else if (this.bossWave < 2) {
-                            if (this.totalTime >= 1010 && !this.civsSpawnedForWave) {
-                                for(let i=0; i<10; i++) this.spawnCiv();
-                                const alertBox = document.getElementById('boss-alert');
-                                if(alertBox) { alertBox.innerText = "Kargaşa"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 3000); }
-                                this.civsSpawnedForWave = true;
-                            }
-                            if (this.totalTime >= 1020) {
-                                this.bossWave = 2;
-                                this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 1.5));
-                                this.bossActive = true;
-                                this.civsSpawnedForWave = false;
-                                this.soundManager.playMusicSequence('bosswave2_1', 'bosswave2_2');
-                            }
-                        }
-                        // Wave 3: 23 mins (1380s)
-                        else if (this.bossWave < 3) {
-                            if (this.totalTime >= 1370 && !this.civsSpawnedForWave) {
-                                for(let i=0; i<10; i++) this.spawnCiv();
-                                const alertBox = document.getElementById('boss-alert');
-                                if(alertBox) { alertBox.innerText = "Kargaşa"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 3000); }
-                                this.civsSpawnedForWave = true;
-                            }
-                            if (this.totalTime >= 1380) {
-                                this.bossWave = 3;
-                                this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 2.25));
-                                this.bossActive = true;
-                                this.civsSpawnedForWave = false;
-                                this.soundManager.playMusicSequence('bosswave3_1', 'vali');
-                            }
-                        }
-                        
-                        if (this.bossActive && this.bossList.length === 0) { this.bossActive = false; this.startPandemic(); }
-
-                        if (this.pandemicActive) {
-                            this.pandemicTimer -= dt;
-                            const bossDogCount = this.dogs.filter(d => d.isBossDog && !d.isCollected).length;
-                            const bossFoodCount = this.bossFood.length;
-                            const hud = document.getElementById('pandemic-hud');
-                            
-                            // Update Text ONLY if HUD is visible (game running)
-                            if (hud && hud.style.display !== 'none') {
-                                 hud.innerHTML = `SALGIN TEHLİKESİ<br>Süre: ${Math.ceil(this.pandemicTimer)}s | Patron Köpek: ${bossDogCount + bossFoodCount}`;
-                            }
-
-                            if (this.pandemicTimer <= 0) {
-                                this.triggerGameOver();
-                                return;
-                            }
-                            if (bossDogCount === 0 && bossFoodCount === 0) {
-                                this.pandemicActive = false; if(hud) hud.style.display = 'none';
-                                if (this.bossWave === 3) { this.wave3Cleared = true; this.valiTimer = 0; }
-                            }
-                        }
-
-                        if (this.wave3Cleared && !this.valiActive) {
-                            this.valiTimer += dt;
-                            if (this.valiTimer > 3 && !this.valiAlertShown) {
-                                const alertBox = document.getElementById('boss-alert'); alertBox.innerText = "The Vali Geliyor"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 3000); this.valiAlertShown = true;
-                            }
-                            if (this.valiTimer > 6) this.spawnVali();
-                        }
-
-                        if (this.valiActive) {
-                             const badActivists = this.activists.filter(a => a.type === 2);
-                             if (badActivists.length === 0 && !this.celebrationActive) { this.startCelebration(); }
-                        }
-
-                        const vec = this.input.getInputVector(this.player.x, this.player.y);
-                        this.player.update(dt, vec, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-                        this.camera.follow(this.player, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-                        
-                        this.activists.forEach(a => { if(a.update(dt, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT) === 'drop_food') this.food.push(new DogFood(a.x, a.y)); });
-                        for(let i = this.a3List.length - 1; i >= 0; i--) { const a = this.a3List[i]; if(a.update(dt, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT) === 'release_dog') { this.spawnDog(this.van.x+(Math.random()-0.5)*50, this.van.y+(Math.random()-0.5)*50); this.player.money = Math.max(0, this.player.money-10); } if(a.markedForDeletion) this.a3List.splice(i, 1); }
-                        this.bossList.forEach(b => { const action = b.update(dt, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT); if (action === 'drop_boss_food') { this.bossFood.push(new BossFood(b.x + (Math.random()-0.5)*200, b.y + (Math.random()-0.5)*200)); } }); this.bossList = this.bossList.filter(b => !b.markedForDeletion);
-                        this.bossFood.forEach(bf => { const action = bf.update(dt); if (action === 'spawn_boss_dog') { this.dogs.push(new BossDog(bf.x, bf.y)); } }); this.bossFood = this.bossFood.filter(bf => !bf.markedForDeletion);
-                        for(let i = this.intruderList.length - 1; i >= 0; i--) { const intruder = this.intruderList[i]; if(intruder.update(dt, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT) === 'spawn_dog') { this.dogs.push(new Dog(intruder.x, intruder.y)); } if(intruder.markedForDeletion) this.intruderList.splice(i, 1); }
-                        for(let i = this.valiList.length - 1; i >= 0; i--) { this.valiList[i].update(dt, this.activists, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT); }
-                        this.activists = this.activists.filter(a => !a.markedForDeletion);
-                        this.dogs.forEach(d => { if(d.update(dt, this.food, this.civs, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT) === 'multiply') this.spawnDog(d.x+10, d.y+10); });
-                        this.civs.forEach(c => { if(c.update(dt, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT, this.dogs) === 'died') { this.player.money = Math.max(0, this.player.money-10); setTimeout(()=>this.spawnCiv(), 5000); } }); this.civs = this.civs.filter(c => !c.markedForDeletion);
-                        this.cleaners.forEach(c => c.update(dt, this.food, this.bossFood));
-                        this.helpers.forEach(h => { if(h.update(dt, this.dogs, this.van, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT) === 'deposit') { this.player.money += 10; this.saveGame(); } });
-                        this.police.forEach(p => p.update(dt, this.a3List, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT));
-                        this.food = this.food.filter(f => !f.markedForDeletion);
-                        this.dogs.forEach(d => { if(!d.isCollected && this.player.distanceTo(d)<60) this.player.addToStack(d); });
-                        this.dogs = this.dogs.filter(d => !d.isCollected);
-                        if(!this.player.isStunned) this.activists.forEach(a => { if(a.type===1 && this.player.distanceTo(a)<50) { const d=this.player.stun(); a.triggerSpeech(); if(d) this.dogs.push(d); } });
-                        this.a3List.forEach(a => { if(this.player.distanceTo(a)<60 && a.state !== 'flee' && a.state !== 'arrested') { a.state='flee'; const m=["Abla bi git ya !!!","Abla senin evin yok mu ya !!!","Allah'ım sana geliyorum !!!"]; this.player.showSpeechBubble(m[Math.floor(Math.random()*m.length)]); } });
-                        this.food.forEach(f => { if(this.player.distanceTo(f)<50) f.markedForDeletion=true; });
-                        let capDisplay = this.player.stack.length; if (this.player.stack.some(d => d.isBossDog)) capDisplay = this.player.maxCapacity; this.uiCap.innerText = `${capDisplay}/${this.player.maxCapacity}`;
-                        const distToVan = Math.sqrt(Math.pow(this.player.x - this.van.x, 2) + Math.pow(this.player.y - (this.van.y - 120), 2));
-                        if(distToVan < 150 && this.player.stack.length > 0) { this.depT+=dt*1000; if(this.depT>CONFIG.DEPOSIT_RATE) { if(this.player.removeFromStack()) { this.player.money+=10; this.saveGame(); } this.depT=0; } }
-                        this.uiMoney.innerText = this.player.money;
-                    }
-
-                    this.ctx.fillStyle = '#333'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                    const bg = this.assets.get('background'); this.ctx.save(); this.ctx.translate(-this.camera.x, -this.camera.y);
-                    if(bg) this.ctx.drawImage(bg, 0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-                    else { this.ctx.strokeStyle='#444'; this.ctx.lineWidth=2; for(let x=Math.floor(this.camera.x/100)*100; x<this.camera.x+this.canvas.width; x+=100) { this.ctx.beginPath(); this.ctx.moveTo(x, this.camera.y); this.ctx.lineTo(x, this.camera.y+this.canvas.height); this.ctx.stroke(); } for(let y=Math.floor(this.camera.y/100)*100; y<this.camera.y+this.canvas.height; y+=100) { this.ctx.beginPath(); this.ctx.moveTo(this.camera.x, y); this.ctx.lineTo(this.camera.x+this.canvas.width, y); this.ctx.stroke(); } }
-                    this.ctx.restore(); this.ctx.save(); this.ctx.translate(CONFIG.WORLD_WIDTH/2-this.camera.x, CONFIG.WORLD_HEIGHT/2-this.camera.y); this.ctx.fillStyle = 'rgba(100, 200, 100, 0.3)'; this.ctx.beginPath(); this.ctx.arc(0, 0, CONFIG.SAFE_ZONE_RADIUS, 0, Math.PI*2); this.ctx.fill(); this.ctx.restore();
-                    
-                    const all = [ this.player, this.van, ...this.dogs, ...this.activists, ...this.a3List, ...this.food, ...this.civs, ...this.cleaners, ...this.helpers, ...this.police, ...this.bossList, ...this.bossFood, ...this.intruderList, ...this.valiList ];
-                    all.sort((a,b)=>a.y-b.y);
-                    this.particles.forEach(p => { p.update(dt); p.draw(this.ctx, this.camera); });
-                    for (let i = this.particles.length - 1; i >= 0; i--) { if (this.particles[i].life <= 0) this.particles.splice(i, 1); }
-                    all.forEach(e => { if (e instanceof Dog) e.trackDust(this.particles, dt); e.draw(this.ctx, this.assets, this.camera); });
-                    if(this.input.active && !this.celebrationActive) { const px=this.player.x-this.camera.x; const py=this.player.y-this.camera.y; const tx=this.input.targetPos.x-this.camera.x; const ty=this.input.targetPos.y-this.camera.y; this.ctx.strokeStyle='rgba(255,255,255,0.5)'; this.ctx.lineWidth=2; this.ctx.beginPath(); this.ctx.moveTo(px,py); this.ctx.lineTo(tx,ty); this.ctx.stroke(); this.ctx.fillStyle='rgba(255,255,255,0.5)'; this.ctx.beginPath(); this.ctx.arc(tx,ty,10,0,Math.PI*2); this.ctx.fill(); }
-                    requestAnimationFrame((t)=>this.loop(t));
-                } catch(e) { console.error(e); showError(e.message); requestAnimationFrame((t)=>this.loop(t)); }
-            }
-        }
-        try { window.onload = () => new Game(); } catch(e) { showError(e.message); }
-    </script>
+    <!-- OYUN KODU (ayrı dosyada) -->
+    <script src="game.js" defer></script>
 </body>
 </html>
