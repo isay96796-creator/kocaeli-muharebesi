@@ -1,0 +1,477 @@
+/* === KOCAELI MUHAREBESİ – STYLESHEET === */
+
+/* BASE */
+body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    overflow: hidden; background-color: #222;
+    font-family: 'Segoe UI', sans-serif;
+    touch-action: none;
+    cursor: url('cursor1.png') 0 0, auto;
+}
+body.clicking { cursor: url('cursor2.png') 0 0, auto; }
+canvas { display: block; cursor: inherit; }
+
+/* UI LAYERS */
+#ui-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10; display: none;
+}
+
+.hud-item {
+    position: absolute; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px); color: white;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 24px; font-weight: bold;
+    display: flex; align-items: center; gap: 10px;
+    pointer-events: auto; cursor: inherit;
+    border: 2px solid rgba(255,255,255,0.2);
+    transition: transform 0.1s;
+}
+.hud-item:active { transform: scale(0.95); }
+.hud-icon { width: 40px; height: 40px; object-fit: contain; display: block; }
+
+#money-counter { top: 20px; left: 20px; color: #ffd700; }
+#score-counter  { top: 20px; right: 20px; color: #44ff44; }
+#capacity-counter { top: 80px; right: 20px; color: #fff; }
+#game-settings-btn {
+    bottom: 30px; left: 30px; cursor: pointer;
+    width: 60px; height: 60px; padding: 0;
+    justify-content: center; border-radius: 50%;
+}
+#market-btn {
+    bottom: 30px; right: 30px;
+    background: #ff9800; color: white;
+    cursor: pointer; border: 2px solid #fff;
+}
+
+/* LOGIN SCREEN */
+#login-screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('background.jpg');
+    background-size: cover; background-position: center;
+    display: none; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 200;
+}
+#login-screen::before {
+    content: ""; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: -1;
+    backdrop-filter: blur(8px);
+}
+.login-box {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    padding: 40px; border-radius: 20px;
+    text-align: center; color: white;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; align-items: center;
+}
+.login-title { font-size: 36px; margin-bottom: 30px; color: #4CAF50; text-shadow: 2px 2px 0 #000; }
+.login-input {
+    padding: 15px; font-size: 24px; border-radius: 10px;
+    border: none; width: 300px; text-align: center;
+    margin-bottom: 20px; outline: none;
+}
+.login-btn {
+    padding: 15px 50px; font-size: 24px; font-weight: bold;
+    background: #4CAF50; color: white; border: none;
+    border-radius: 50px; cursor: pointer; transition: 0.2s;
+}
+.login-btn:hover { transform: scale(1.05); background: #45a049; }
+#welcome-msg { font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #fff; display: none; }
+.switch-user { margin-top: 15px; font-size: 14px; color: #aaa; cursor: pointer; text-decoration: underline; }
+.switch-user:hover { color: #fff; }
+
+/* MAIN MENU */
+#main-menu {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('background.jpg');
+    background-size: cover; background-position: center;
+    display: none; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 150; color: white; pointer-events: auto;
+}
+#main-menu::before {
+    content: ""; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: -1;
+}
+#menu-center { display: flex; flex-direction: column; align-items: center; margin-bottom: 100px; z-index: 10; gap: 15px; }
+#main-menu h1 { font-size: 80px; margin: 0; color: #4CAF50; text-shadow: 4px 4px 0 #000; text-align: center; }
+#main-menu h3 { font-size: 28px; margin-bottom: 20px; color: #aaa; font-weight: normal; text-align: center; }
+.menu-btn {
+    padding: 12px 30px; font-size: 22px; font-weight: bold;
+    background: white; color: #333; border: none;
+    border-radius: 50px; cursor: pointer;
+    transition: transform 0.1s; width: 320px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.menu-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+.menu-btn svg { width: 24px; height: 24px; fill: #333; }
+#mm-fullscreen-btn {
+    position: absolute; bottom: 30px; left: 30px;
+    background: rgba(0,0,0,0.5); color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 10px 20px; border-radius: 30px;
+    font-size: 18px; font-weight: bold; cursor: pointer;
+    transition: 0.2s;
+    display: flex; align-items: center; gap: 8px; z-index: 20;
+}
+#mm-fullscreen-btn:hover { background: rgba(0,0,0,0.8); border-color: white; }
+#mm-fullscreen-btn svg { width: 20px; height: 20px; fill: white; }
+
+/* DECORATIONS */
+#menu-left {
+    position: absolute; top: 50%; left: 30px;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    align-items: center; z-index: 5;
+}
+#menu-left img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
+#menu-left img:hover { transform: scale(1.1); }
+#menu-right-container {
+    position: absolute; top: 50%; right: 30px;
+    transform: translateY(-50%);
+    display: flex; gap: 20px; z-index: 5;
+}
+.menu-col { display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
+.menu-col img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
+.menu-col img:hover { transform: scale(1.1); }
+#menu-bottom {
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 40px; align-items: flex-end; z-index: 5;
+}
+#menu-bottom img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
+#menu-bottom img:hover { transform: translateY(-10px); }
+
+/* MODALS */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 500;
+    justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
+}
+.modal-box, .modal-content {
+    background: #fff; color: #333; padding: 30px;
+    border-radius: 20px; width: 90%; max-width: 500px;
+    text-align: center; position: relative;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; gap: 15px;
+}
+.modal-content { max-width: 700px; }
+.modal-close {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 36px; font-weight: bold; cursor: pointer;
+    color: #555; line-height: 1; z-index: 501; transition: 0.2s;
+}
+.modal-close:hover { color: #f44336; transform: scale(1.2); }
+.modal-title { font-size: 32px; font-weight: bold; margin-bottom: 10px; color: #4CAF50; }
+.setting-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 20px; background: #f0f0f0;
+    padding: 15px; border-radius: 10px;
+    flex-wrap: wrap; gap: 10px;
+}
+input[type=range] { width: 150px; cursor: pointer; }
+.modal-btn {
+    padding: 15px; font-size: 20px; font-weight: bold;
+    border: none; border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; transition: 0.2s;
+}
+.btn-green { background: #4CAF50; color: white; }
+.btn-blue  { background: #2196F3; color: white; }
+.btn-red   { background: #f44336; color: white; }
+.btn-dark  { background: #333; color: white; }
+.modal-btn:hover { opacity: 0.9; transform: scale(1.02); }
+.modal-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* MARKET */
+.market-header {
+    font-size: 48px; font-weight: 900; color: #ff9800;
+    margin-bottom: 20px; text-transform: uppercase;
+    letter-spacing: 2px; text-shadow: 1px 1px 0 #333;
+    border-bottom: 3px solid #ff9800;
+    display: inline-block; padding-bottom: 5px;
+}
+.upgrade-grid {
+    display: flex; justify-content: space-around;
+    margin-top: 10px; gap: 15px; flex-wrap: wrap;
+}
+.upgrade-card {
+    background: #f8f8f8; padding: 15px; border-radius: 15px;
+    flex: 1; min-width: 130px;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; border: 2px solid #ddd; transition: 0.2s;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+.upgrade-card:hover { transform: translateY(-5px); border-color: #ff9800; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+.upgrade-card.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); transform: none; }
+.upgrade-title { font-weight: bold; font-size: 18px; color: #333; margin: 5px 0; }
+.upgrade-icon { width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; }
+.upgrade-price { background: #4CAF50; color: white; padding: 5px 15px; border-radius: 15px; margin-top: 5px; font-weight: bold; font-size: 16px; }
+
+/* SCOREBOARD */
+.score-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.score-table th, .score-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+.score-table th { background: #eee; }
+.score-table tr:nth-child(even) { background: #fafafa; }
+
+/* HOW TO PLAY */
+#how-to-play {
+    display: none; position: fixed;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 85%; height: 85%;
+    background: rgba(0,0,0,0.95);
+    border: 4px solid #4CAF50; border-radius: 20px;
+    z-index: 500; flex-direction: row;
+    align-items: center; justify-content: space-between;
+    padding: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.8); color: white;
+}
+.nav-arrow { font-size: 60px; cursor: pointer; padding: 20px; user-select: none; color: #888; transition: 0.2s; z-index: 502; }
+.nav-arrow:hover { color: #fff; transform: scale(1.2); }
+#slide-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; overflow: hidden; }
+#slide-img-container { display: flex; gap: 20px; justify-content: center; align-items: flex-end; height: 300px; margin-bottom: 20px; }
+.slide-img-item { height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); }
+.boss-dog-style { filter: sepia(1) saturate(4) hue-rotate(-50deg) drop-shadow(0 0 20px red) !important; transform: scale(1.3); }
+#slide-title { font-size: 48px; color: #FFD700; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; }
+#slide-desc { font-size: 20px; max-width: 900px; line-height: 1.6; color: #ddd; white-space: pre-line; text-align: left; max-height: 40vh; overflow-y: auto; padding: 0 20px; }
+.text-center #slide-desc { text-align: center; }
+
+/* ALERTS & OVERLAYS */
+#loading-screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: #333; display: flex; justify-content: center;
+    align-items: center; color: white; font-size: 24px;
+    z-index: 200; flex-direction: column; cursor: wait;
+}
+.progress-bar { width: 300px; height: 20px; background: #555; margin-top: 20px; border-radius: 10px; overflow: hidden; }
+.progress-fill { width: 0%; height: 100%; background: #4CAF50; transition: width 0.2s; }
+#debug-log { font-size: 14px; color: #aaa; margin-top: 10px; font-family: monospace; text-align: center; padding: 10px; }
+#error-display { color: #ff5555; font-weight: bold; margin-top: 10px; max-width: 80%; word-wrap: break-word; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; display: none; }
+
+#boss-alert {
+    position: absolute; top: 20%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px; font-weight: bold; color: #ff4444;
+    text-shadow: 2px 2px 0 #000;
+    display: none; animation: pulse 1s infinite;
+    z-index: 20; text-align: center; width: 100%;
+}
+@keyframes pulse {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    50%  { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+#pandemic-hud {
+    position: absolute; top: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(200,0,0,0.85); color: white;
+    padding: 15px 25px; border-radius: 10px;
+    font-size: 24px; font-weight: bold;
+    display: none; text-align: center;
+    border: 3px solid #fff; z-index: 15;
+    box-shadow: 0 0 15px red;
+}
+
+#game-screen-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(180,0,0,0.8);
+    display: none; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 10000; color: white; text-align: center;
+    pointer-events: auto; backdrop-filter: blur(5px);
+    transition: background 1s;
+}
+#overlay-title { font-size: 60px; text-shadow: 4px 4px 0 #000; margin-bottom: 40px; color: #ffdddd; }
+#restart-btn {
+    padding: 20px 50px; font-size: 32px; font-weight: bold;
+    background: white; color: #d32f2f; border: none;
+    border-radius: 15px; cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    pointer-events: auto; transition: transform 0.1s;
+}
+#restart-btn:hover { transform: scale(1.05); }
+
+/* ================================================================ */
+/* MOBİL UYUMLULUK – ANDROID TELEFON OPTİMİZASYONU                  */
+/* ================================================================ */
+
+/* Dikey mod uyarısı */
+#portrait-warning {
+    display: none;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #111; z-index: 99999;
+    flex-direction: column; justify-content: center; align-items: center;
+    color: white; text-align: center; gap: 20px;
+    padding: 20px; box-sizing: border-box;
+}
+#portrait-warning .rotate-icon {
+    font-size: 80px;
+    animation: rotatePulse 2s infinite;
+}
+#portrait-warning h2 { font-size: 26px; margin: 0; color: #4CAF50; }
+#portrait-warning p  { font-size: 16px; color: #aaa; margin: 0; max-width: 280px; }
+@keyframes rotatePulse {
+    0%   { transform: rotate(0deg); }
+    40%  { transform: rotate(90deg); }
+    60%  { transform: rotate(90deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Yatay mod → uyarıyı gizle */
+@media (orientation: landscape) {
+    #portrait-warning { display: none !important; }
+}
+
+/* Dikey mod → uyarıyı göster (telefon) */
+@media (orientation: portrait) and (max-width: 900px) {
+    #portrait-warning { display: flex; }
+}
+
+/* ---------------------------------------------------------------
+   GENEL MOBIL TEMEL (max-width: 900px)
+--------------------------------------------------------------- */
+@media (max-width: 900px) {
+    /* Çift dokunuş zoom engeli */
+    * { touch-action: manipulation; }
+    canvas { touch-action: none !important; }
+
+    /* ---- HUD ---- */
+    .hud-item {
+        padding: 8px 14px;
+        font-size: 17px;
+        border-radius: 14px;
+        gap: 6px;
+    }
+    .hud-icon { width: 28px; height: 28px; }
+
+    #money-counter   { top: 10px; left: 10px; }
+    #score-counter   { top: 10px; right: 10px; }
+    #capacity-counter { top: 62px; right: 10px; font-size: 15px; }
+
+    /* Ayarlar butonu – sol alt, büyük dokunma hedefi */
+    #game-settings-btn {
+        bottom: 15px; left: 15px;
+        width: 58px; height: 58px;
+    }
+    /* Market butonu – sağ alt */
+    #market-btn {
+        bottom: 15px; right: 15px;
+        font-size: 17px; padding: 10px 16px;
+    }
+
+    /* Boss alert */
+    #boss-alert { font-size: 28px; }
+
+    /* Salgın HUD */
+    #pandemic-hud { font-size: 16px; padding: 10px 16px; top: 60px; }
+
+    /* Oyun sonu ekranı */
+    #overlay-title { font-size: 34px; margin-bottom: 20px; }
+    #restart-btn   { font-size: 22px; padding: 14px 32px; }
+
+    /* ---- GİRİŞ EKRANI ---- */
+    .login-box { padding: 24px 20px; width: 85%; box-sizing: border-box; }
+    .login-title  { font-size: 26px; margin-bottom: 18px; }
+    .login-input  { font-size: 18px; padding: 10px; width: 100%; box-sizing: border-box; }
+    .login-btn    { font-size: 18px; padding: 12px 30px; }
+
+    /* ---- ANA MENÜ ---- */
+    #main-menu h1 { font-size: 40px; }
+    #main-menu h3 { font-size: 16px; margin-bottom: 10px; }
+    #menu-center  { margin-bottom: 20px; gap: 10px; }
+    .menu-btn { font-size: 16px; padding: 10px 20px; width: 240px; gap: 8px; }
+    .menu-btn svg { width: 20px; height: 20px; }
+
+    /* Menü dekoratif görseller – mobilde gizle (yer kaplıyor) */
+    #menu-left, #menu-right-container, #menu-bottom { display: none; }
+
+    #mm-fullscreen-btn { bottom: 15px; left: 15px; font-size: 14px; padding: 8px 14px; }
+    #mm-fullscreen-btn svg { width: 16px; height: 16px; }
+
+    /* ---- MODAL GENEL ---- */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal-box, .modal-content {
+        width: 100%; max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 16px;
+        max-height: 85vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .modal-title { font-size: 24px; }
+    .modal-close  { font-size: 30px; top: 12px; right: 14px; }
+
+    .setting-row  { font-size: 16px; padding: 12px; }
+    input[type=range] { width: 120px; }
+
+    .modal-btn { font-size: 16px; padding: 12px; }
+
+    /* ---- MARKET ---- */
+    .market-header { font-size: 28px; }
+    .upgrade-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .upgrade-card { padding: 10px; min-width: unset; }
+    .upgrade-icon { width: 50px; height: 50px; }
+    .upgrade-title { font-size: 14px; }
+    .upgrade-price { font-size: 13px; padding: 4px 10px; }
+
+    /* ---- SKOR TABLOSU ---- */
+    .score-table th, .score-table td { font-size: 13px; padding: 6px 4px; }
+
+    /* ---- NASIL OYNANIR ---- */
+    #how-to-play {
+        width: 100%; height: 100%;
+        border-radius: 0; border: none;
+        flex-direction: column;
+        padding: 10px;
+    }
+    #slide-img-container { height: 140px; gap: 10px; margin-bottom: 10px; }
+    #slide-title    { font-size: 24px; margin-bottom: 8px; }
+    #slide-desc     { font-size: 14px; line-height: 1.5; max-height: 25vh; }
+    .nav-arrow      { font-size: 40px; padding: 10px; }
+
+    /* ---- AYARLAR MODALİ – ingame kontroller ---- */
+    #ingame-settings-controls { gap: 8px; margin-top: 12px; }
+}
+
+/* ---------------------------------------------------------------
+   KÜÇÜK TELEFONLAR (max-width: 480px)
+--------------------------------------------------------------- */
+@media (max-width: 480px) {
+    #main-menu h1  { font-size: 30px; }
+    .menu-btn      { font-size: 14px; padding: 9px 16px; width: 210px; }
+
+    .upgrade-grid  { grid-template-columns: repeat(2, 1fr); }
+    .upgrade-card  { padding: 8px; }
+    .upgrade-icon  { width: 44px; height: 44px; }
+
+    .hud-item      { font-size: 14px; padding: 6px 10px; }
+    #boss-alert    { font-size: 22px; }
+    #overlay-title { font-size: 26px; }
+    #restart-btn   { font-size: 18px; padding: 12px 26px; }
+}
+
+/* ---------------------------------------------------------------
+   DOKUNMA GERİ BİLDİRİMİ – Tüm tıklanabilir öğeler
+--------------------------------------------------------------- */
+.menu-btn:active,
+.modal-btn:active,
+.upgrade-card:not(.disabled):active,
+#market-btn:active,
+#game-settings-btn:active,
+#login-btn:active,
+.nav-arrow:active,
+#restart-btn:active {
+    opacity: 0.75;
+    transform: scale(0.94);
+}
