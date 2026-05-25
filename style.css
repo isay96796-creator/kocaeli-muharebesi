@@ -417,31 +417,48 @@ input[type=range] { width: 150px; cursor: pointer; }
     .modal-overlay { padding: 0; align-items: flex-end; }
     .modal-box, .modal-content {
         width: 100%; max-width: 100%;
-        border-radius: 20px 20px 0 0;
-        padding: 20px 16px;
-        max-height: 85vh;
+        border-radius: 24px 24px 0 0;
+        padding: 10px 16px 24px;
+        max-height: 80vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        /* Handle bar ("bottom sheet" tutma çubuğu) */
+        background-image: linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+        background-size: 40px 4px;
+        background-repeat: no-repeat;
+        background-position: center 8px;
+        padding-top: 22px;
     }
-    .modal-title { font-size: 24px; }
-    .modal-close  { font-size: 30px; top: 12px; right: 14px; }
+    /* Handle bar görsel olarak üstüne */
+    .modal-box::before, .modal-content::before {
+        content: '';
+        display: block;
+        width: 40px; height: 4px;
+        background: #ccc; border-radius: 4px;
+        margin: 0 auto 14px;
+    }
+    .modal-title { font-size: 22px; margin-bottom: 6px; }
+    .modal-close  { font-size: 32px; top: 10px; right: 14px; }
 
-    .setting-row  { font-size: 16px; padding: 12px; }
-    input[type=range] { width: 120px; }
+    .setting-row  { font-size: 15px; padding: 14px 12px; min-height: 52px; }
+    input[type=range] { width: 130px; height: 28px; }
 
-    .modal-btn { font-size: 16px; padding: 12px; }
+    /* Ayarlar butonları – daha büyük dokunma hedefi */
+    .modal-btn { font-size: 17px; padding: 16px 12px; border-radius: 14px; }
+    .modal-btn svg { width: 22px; height: 22px; }
 
     /* ---- MARKET ---- */
-    .market-header { font-size: 28px; }
+    .market-header { font-size: 26px; margin-bottom: 10px; }
+    /* Yatay telefon: 5 kart yan yana */
     .upgrade-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
     }
-    .upgrade-card { padding: 10px; min-width: unset; }
-    .upgrade-icon { width: 50px; height: 50px; }
-    .upgrade-title { font-size: 14px; }
-    .upgrade-price { font-size: 13px; padding: 4px 10px; }
+    .upgrade-card { padding: 10px 6px; min-width: unset; gap: 4px; }
+    .upgrade-icon { width: 46px; height: 46px; }
+    .upgrade-title { font-size: 12px; }
+    .upgrade-price { font-size: 12px; padding: 3px 8px; border-radius: 10px; }
 
     /* ---- SKOR TABLOSU ---- */
     .score-table th, .score-table td { font-size: 13px; padding: 6px 4px; }
