@@ -105,6 +105,31 @@ class SoundManager {
         s.currentTime = 0; s.loop = true; s.volume = this.mv;
         s.play().catch(() => {}); this.bgm = s;
     }
+    resumeMusic(n, time) {
+        if (this.mv <= 0.01) { this.cur = n; return; }
+        this.stop(); this.cur = n;
+        const s = this.snd[n]; if (!s) return;
+        const isLoop = !['gamestart1', 'intruder_vehiclewave1_1', 'intruder_vehiclewave2_1', 'bosswave1_1', 'bosswave2_1'].includes(n);
+        s.currentTime = time || 0; s.loop = isLoop; s.volume = this.mv;
+        s.play().catch(() => {}); this.bgm = s;
+        if (!isLoop) {
+            let loopName = '';
+            if      (n === 'gamestart1')               loopName = 'gamestart2';
+            else if (n === 'intruder_vehiclewave1_1') loopName = 'intruder_vehiclewave1_2';
+            else if (n === 'intruder_vehiclewave2_1') loopName = 'intruder_vehiclewave2_2';
+            else if (n === 'bosswave1_1')             loopName = 'bosswave1_2';
+            else if (n === 'bosswave2_1')             loopName = 'bosswave2_2';
+            
+            if (loopName) {
+                const loop = this.snd[loopName];
+                s.onended = () => {
+                    if (this.mv <= 0.01) return;
+                    loop.currentTime = 0; loop.volume = this.mv; loop.loop = true;
+                    loop.play().catch(() => {}); this.bgm = loop; this.cur = loopName;
+                };
+            }
+        }
+    }
     stop() {
         if (this.bgm) { this.bgm.pause(); this.bgm.currentTime = 0; this.bgm.onended = null; this.bgm = null; }
         this.cur = null;
@@ -807,6 +832,7 @@ class Game {
         const slideTit = document.getElementById('slide-title');
         const slideDesc = document.getElementById('slide-desc');
         const howTo = document.getElementById('how-to-play');
+        const slideDots = document.getElementById('slide-dots');
 
         const updSlide = (i) => {
             if (i < 0) curSlide = chars.length - 1; else if (i >= chars.length) curSlide = 0; else curSlide = i;
@@ -817,6 +843,16 @@ class Game {
                 if (c.images) c.images.forEach(src => { const img = document.createElement('img'); img.src = src; img.className = 'slide-img-item'; if (c.customClass) img.classList.add(c.customClass); slideImg.appendChild(img); });
             }
             slideTit.innerText = c.title; slideDesc.innerText = c.desc;
+            
+            if (slideDots) {
+                slideDots.innerHTML = '';
+                chars.forEach((_, idx) => {
+                    const dot = document.createElement('span');
+                    dot.className = 'slide-dot' + (idx === curSlide ? ' active' : '');
+                    dot.onclick = () => { this.sm.playSFX('click'); updSlide(idx); };
+                    slideDots.appendChild(dot);
+                });
+            }
         };
 
         document.getElementById('play-btn').onclick = () => { this.sm.playSFX('click'); menu.style.display = 'none'; document.getElementById('ui-layer').style.display = 'block'; this.sm.playMusicSequence('gamestart1', 'gamestart2'); this.lastTime = performance.now(); requestAnimationFrame(t => this.loop(t)); };
@@ -826,16 +862,20 @@ class Game {
             menu.style.display = 'none';
             document.getElementById('ui-layer').style.display = 'block';
             this.lastTime = performance.now();
-            // Müzik: önce tamamen durdur, sonra totalTime'a göre doğru parçayı çal
-            this.sm.stop();
-            const T  = this.totalTime;
-            const TM = CONFIG.TIMINGS;
-            if      (T >= TM.MUSIC_BOSS_3_TIME)     this.sm.playLoop('vali');
-            else if (T >= TM.MUSIC_BOSS_2_TIME)     this.sm.playMusicSequence('bosswave2_1',           'bosswave2_2');
-            else if (T >= TM.MUSIC_BOSS_1_TIME)     this.sm.playMusicSequence('bosswave1_1',           'bosswave1_2');
-            else if (T >= TM.MUSIC_INTRUDER_2_TIME) this.sm.playMusicSequence('intruder_vehiclewave2_1','intruder_vehiclewave2_2');
-            else if (T >= TM.MUSIC_INTRUDER_1_TIME) this.sm.playMusicSequence('intruder_vehiclewave1_1','intruder_vehiclewave1_2');
-            else                                     this.sm.playMusicSequence('gamestart1',            'gamestart2');
+            
+            if (this.loadedMusicTrack) {
+                this.sm.resumeMusic(this.loadedMusicTrack, this.loadedMusicTime);
+            } else {
+                this.sm.stop();
+                const T  = this.totalTime;
+                const TM = CONFIG.TIMINGS;
+                if      (T >= TM.MUSIC_BOSS_3_TIME)     this.sm.playLoop('vali');
+                else if (T >= TM.MUSIC_BOSS_2_TIME)     this.sm.playMusicSequence('bosswave2_1',           'bosswave2_2');
+                else if (T >= TM.MUSIC_BOSS_1_TIME)     this.sm.playMusicSequence('bosswave1_1',           'bosswave1_2');
+                else if (T >= TM.MUSIC_INTRUDER_2_TIME) this.sm.playMusicSequence('intruder_vehiclewave2_1','intruder_vehiclewave2_2');
+                else if (T >= TM.MUSIC_INTRUDER_1_TIME) this.sm.playMusicSequence('intruder_vehiclewave1_1','intruder_vehiclewave1_2');
+                else                                     this.sm.playMusicSequence('gamestart1',            'gamestart2');
+            }
             requestAnimationFrame(t => this.loop(t));
         };
         document.getElementById('info-btn').onclick = () => { this.sm.playSFX('click'); howTo.style.display = 'flex'; updSlide(0); };
@@ -848,8 +888,24 @@ class Game {
         document.getElementById('settings-menu-btn').onclick = () => { this.sm.playSFX('click'); this.openSettings(false); };
         document.getElementById('game-settings-btn').onclick = () => { this.sm.playSFX('click'); this.openSettings(true); };
         document.getElementById('settings-close').onclick = () => { this.sm.playSFX('click'); setModal.style.display = 'none'; this.paused = false; };
-        document.getElementById('volume-music').oninput = e => this.sm.setMusicVolume(parseFloat(e.target.value));
-        document.getElementById('volume-sfx').oninput = e => this.sm.setSfxVolume(parseFloat(e.target.value));
+        const musicSlider = document.getElementById('volume-music');
+        const sfxSlider = document.getElementById('volume-sfx');
+        musicSlider.oninput = e => {
+            const val = parseFloat(e.target.value);
+            this.sm.setMusicVolume(val);
+            musicSlider.style.setProperty('--val', `${val * 100}%`);
+        };
+        sfxSlider.oninput = e => {
+            const val = parseFloat(e.target.value);
+            this.sm.setSfxVolume(val);
+            sfxSlider.style.setProperty('--val', `${val * 100}%`);
+        };
+        document.getElementById('mute-music-btn').onclick = () => { this.sm.playSFX('click'); this.sm.setMusicVolume(0); this.syncVolumeSliders(); };
+        document.getElementById('max-music-btn').onclick = () => { this.sm.playSFX('click'); this.sm.setMusicVolume(1); this.syncVolumeSliders(); };
+        document.getElementById('mute-sfx-btn').onclick = () => { this.sm.playSFX('click'); this.sm.setSfxVolume(0); this.syncVolumeSliders(); };
+        document.getElementById('max-sfx-btn').onclick = () => { this.sm.playSFX('click'); this.sm.setSfxVolume(1); this.syncVolumeSliders(); };
+        document.getElementById('ingame-resume').onclick = () => { this.sm.playSFX('click'); setModal.style.display = 'none'; this.paused = false; };
+
         const sNameIn = document.getElementById('setting-name-input');
         document.getElementById('setting-name-save').onclick = () => { const n = sNameIn.value.trim(); if (n) { this.playerName = n; localStorage.setItem('kocaeli_player_name', n); } };
         document.getElementById('ingame-save').onclick = () => { this.sm.playSFX('click'); this.saveGame(); };
@@ -937,9 +993,34 @@ class Game {
     openSettings(ingame) {
         const m = document.getElementById('settings-modal');
         const c = document.getElementById('ingame-settings-controls');
+        const title = document.getElementById('settings-title');
+        const nameSec = document.getElementById('setting-section-name');
         document.getElementById('setting-name-input').value = this.playerName;
         m.style.display = 'flex';
-        if (ingame) { this.paused = true; c.style.display = 'flex'; } else c.style.display = 'none';
+        if (ingame) {
+            this.paused = true;
+            c.style.display = 'flex';
+            if (title) title.innerText = '⏸️ Oyun Durduruldu';
+            if (nameSec) nameSec.style.display = 'none';
+        } else {
+            c.style.display = 'none';
+            if (title) title.innerText = '⚙️ Ayarlar';
+            if (nameSec) nameSec.style.display = 'flex';
+        }
+        this.syncVolumeSliders();
+    }
+
+    syncVolumeSliders() {
+        const musicSlider = document.getElementById('volume-music');
+        const sfxSlider = document.getElementById('volume-sfx');
+        if (musicSlider) {
+            musicSlider.value = this.sm.mv;
+            musicSlider.style.setProperty('--val', `${this.sm.mv * 100}%`);
+        }
+        if (sfxSlider) {
+            sfxSlider.value = this.sm.sv;
+            sfxSlider.style.setProperty('--val', `${this.sm.sv * 100}%`);
+        }
     }
 
     setupUI() {
@@ -962,6 +1043,8 @@ class Game {
             if (this.player.money < CONFIG[key]) btn.classList.add('disabled'); else btn.classList.remove('disabled');
         });
         if (this.uiMoney) this.uiMoney.innerText = this.player.money;
+        const mBudget = document.getElementById('market-budget-val');
+        if (mBudget) mBudget.innerText = `₺${this.player.money}`;
     }
 
     resize() {
@@ -1000,7 +1083,9 @@ class Game {
             bossList: this.bossList.map(x => ({ x: x.x, y: x.y, maxDrops: x.maxDrops, dropCount: x.dropCount, state: x.state })),
             bossFood: this.bossFood.map(x => ({ x: x.x, y: x.y, timer: x.timer })),
             intruderList: this.intruderList.map(x => ({ x: x.x, y: x.y, state: x.state, timer: x.timer, dropTimer: x.dropTimer })),
-            valiList: this.valiList.map(x => ({ x: x.x, y: x.y, state: x.state }))
+            valiList: this.valiList.map(x => ({ x: x.x, y: x.y, state: x.state })),
+            musicTrack: this.sm.cur,
+            musicTime: this.sm.bgm ? this.sm.bgm.currentTime : 0
         };
         localStorage.setItem('kocaeli_save', JSON.stringify(d));
     }
@@ -1053,6 +1138,9 @@ class Game {
             const h = document.getElementById('pandemic-hud');
             if (this.pandemicActive && h) h.style.display = 'block';
         }
+        
+        this.loadedMusicTrack = d.musicTrack || null;
+        this.loadedMusicTime = d.musicTime || 0;
     }
 
     saveHighScore() {

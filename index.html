@@ -119,6 +119,7 @@
             <div id="slide-img-container"></div>
             <h2 id="slide-title"></h2>
             <p id="slide-desc"></p>
+            <div id="slide-dots" class="slide-dots-container"></div>
         </div>
         <div class="nav-arrow" id="next-slide">&#10095;</div>
     </div>
@@ -128,10 +129,10 @@
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-box">
             <span id="settings-close" class="modal-close">&times;</span>
-            <div class="modal-title">⚙️ Ayarlar</div>
+            <div class="modal-title" id="settings-title">⚙️ Ayarlar</div>
 
             <!-- İsim -->
-            <div class="setting-section">
+            <div class="setting-section" id="setting-section-name">
                 <div class="setting-label">👤 Oyuncu Adı</div>
                 <div class="setting-name-row">
                     <input type="text" id="setting-name-input" class="setting-name-input" placeholder="Adınız..." maxlength="12">
@@ -143,22 +144,22 @@
             <div class="setting-section">
                 <div class="setting-label">🎵 Müzik Sesi</div>
                 <div class="setting-slider-row">
-                    <span class="slider-icon">🔇</span>
+                    <span class="slider-icon" id="mute-music-btn" style="cursor:pointer">🔇</span>
                     <input type="range" id="volume-music" min="0" max="1" step="0.1" value="0.5" class="styled-slider">
-                    <span class="slider-icon">🔊</span>
+                    <span class="slider-icon" id="max-music-btn" style="cursor:pointer">🔊</span>
                 </div>
             </div>
             <div class="setting-section">
                 <div class="setting-label">🔔 Ses Efektleri</div>
                 <div class="setting-slider-row">
-                    <span class="slider-icon">🔇</span>
+                    <span class="slider-icon" id="mute-sfx-btn" style="cursor:pointer">🔇</span>
                     <input type="range" id="volume-sfx" min="0" max="1" step="0.1" value="0.5" class="styled-slider">
-                    <span class="slider-icon">🔊</span>
+                    <span class="slider-icon" id="max-sfx-btn" style="cursor:pointer">🔊</span>
                 </div>
             </div>
 
             <!-- Oyun içi butonlar (2x2 grid) -->
-            <div id="ingame-settings-controls" style="display:none;flex-direction:column;gap:10px;margin-top:8px">
+            <div id="ingame-settings-controls" style="display:none;flex-direction:column;gap:12px;margin-top:8px">
                 <div class="ingame-btn-grid">
                     <button class="ingame-action-btn btn-dark" id="ingame-fullscreen">
                         <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
@@ -177,6 +178,7 @@
                         <span>Ana Menü</span>
                     </button>
                 </div>
+                <button class="ingame-resume-btn" id="ingame-resume">OYUNA DÖN</button>
             </div>
         </div>
     </div>
@@ -224,29 +226,34 @@
     <div id="market-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 class="market-header">MARKET</h2>
+            <div class="market-top-bar">
+                <h2 class="market-header">MARKET</h2>
+                <div class="market-budget-badge">
+                    <span>BÜTÇE:</span> <span id="market-budget-val">₺0</span>
+                </div>
+            </div>
             <div class="upgrade-grid">
-                <div class="upgrade-card" id="btn-speed">
+                <div class="upgrade-card speed-theme" id="btn-speed">
                     <img src="" class="upgrade-icon" id="icon-speed" alt="Hız">
                     <div class="upgrade-title">HIZ</div>
                     <div class="upgrade-price" id="price-speed">₺50</div>
                 </div>
-                <div class="upgrade-card" id="btn-capacity">
+                <div class="upgrade-card capacity-theme" id="btn-capacity">
                     <img src="" class="upgrade-icon" id="icon-capacity" alt="Kapasite">
                     <div class="upgrade-title">KAFES</div>
                     <div class="upgrade-price" id="price-capacity">₺100</div>
                 </div>
-                <div class="upgrade-card" id="btn-cleaner">
+                <div class="upgrade-card cleaner-theme" id="btn-cleaner">
                     <img src="" class="upgrade-icon" id="icon-cleaner" alt="Temizlikçi">
                     <div class="upgrade-title">TEMİZLİKÇİ</div>
                     <div class="upgrade-price" id="price-cleaner">₺500</div>
                 </div>
-                <div class="upgrade-card" id="btn-helper">
+                <div class="upgrade-card helper-theme" id="btn-helper">
                     <img src="" class="upgrade-icon" id="icon-helper" alt="Ekip">
                     <div class="upgrade-title">EKİP</div>
                     <div class="upgrade-price" id="price-helper">₺600</div>
                 </div>
-                <div class="upgrade-card" id="btn-police">
+                <div class="upgrade-card police-theme" id="btn-police">
                     <img src="" class="upgrade-icon" id="icon-police" alt="Polis">
                     <div class="upgrade-title">POLİS</div>
                     <div class="upgrade-price" id="price-police">₺600</div>
