@@ -122,6 +122,24 @@ canvas { display: block; cursor: inherit; }
 #mm-fullscreen-btn:hover { background: rgba(0,0,0,0.8); border-color: white; }
 #mm-fullscreen-btn svg { width: 20px; height: 20px; fill: white; }
 
+/* VERSİYON & GİZLİLİK */
+#menu-footer {
+    position: absolute; bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; z-index: 20; pointer-events: auto;
+}
+#menu-version {
+    font-size: 13px; color: rgba(255,255,255,0.45);
+    font-family: monospace; letter-spacing: 1px;
+}
+#menu-privacy {
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    text-decoration: underline; cursor: pointer;
+    transition: color 0.2s;
+}
+#menu-privacy:hover { color: rgba(255,255,255,0.85); }
+
 /* DECORATIONS */
 #menu-left {
     position: absolute; top: 50%; left: 30px;
@@ -251,7 +269,7 @@ input[type=range] { width: 150px; cursor: pointer; }
 }
 .progress-bar { width: 300px; height: 20px; background: #555; margin-top: 20px; border-radius: 10px; overflow: hidden; }
 .progress-fill { width: 0%; height: 100%; background: #4CAF50; transition: width 0.2s; }
-#debug-log { font-size: 14px; color: #aaa; margin-top: 10px; font-family: monospace; text-align: center; padding: 10px; }
+#debug-log { display: none !important; } /* production: gizli */
 #error-display { color: #ff5555; font-weight: bold; margin-top: 10px; max-width: 80%; word-wrap: break-word; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; display: none; }
 
 #boss-alert {

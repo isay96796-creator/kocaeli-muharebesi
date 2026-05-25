@@ -27,7 +27,16 @@ const CONFIG = {
     SAFE_ZONE_RADIUS: 400, BUILDING_BOUNDS: { x: 0, y: 0, w: 600, h: 600 },
     FOOD_EAT_TIME: 6000, CIVILIAN_EAT_TIME: 5000, HELPER_CAPACITY: 2,
     BOSS_DROPS_BASE: 30, BOSS_WAVE_DELAY: 120,
-    CLEANER_SPEED_NORMAL: 80, CLEANER_SPEED_FAST: 400
+    CLEANER_SPEED_NORMAL: 80, CLEANER_SPEED_FAST: 400,
+    TIMINGS: {
+        MUSIC_START_TIME: 0,
+        INTRUDER_1_TIME: 300, MUSIC_INTRUDER_1_TIME: 290,
+        INTRUDER_2_TIME: 600, MUSIC_INTRUDER_2_TIME: 590,
+        BOSS_1_WARN_TIME: 830, BOSS_1_SPAWN_TIME: 840, MUSIC_BOSS_1_TIME: 830, BOSS_1_PANDEMIC_DURATION: 60,
+        BOSS_2_WARN_TIME: 1010, BOSS_2_SPAWN_TIME: 1020, MUSIC_BOSS_2_TIME: 1015, BOSS_2_PANDEMIC_DURATION: 45,
+        BOSS_3_WARN_TIME: 1300, BOSS_3_SPAWN_TIME: 1310, MUSIC_BOSS_3_TIME: 1305, BOSS_3_PANDEMIC_DURATION: 30,
+        VALI_WARN_DELAY: 15, VALI_SPAWN_DELAY: 20
+    }
 };
 
 // --- SES YÖNETİCİSİ ---
@@ -58,9 +67,16 @@ class SoundManager {
     setMusicVolume(v) { this.mv = v; localStorage.setItem('mV', v); if (this.bgm) this.bgm.volume = v; }
     setSfxVolume(v) { this.sv = v; localStorage.setItem('sV', v); }
     playSFX(n) {
-        if (this.sv <= 0.01) return;
-        const s = this.snd[n]; if (!s) return;
-        const c = s.cloneNode(); c.volume = this.sv; c.play().catch(() => {});
+        if (this.sv > 0.01 && this.snd[n]) {
+            const c = this.snd[n].cloneNode(); c.volume = this.sv; c.play().catch(() => {});
+        }
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+            const Haptics = window.Capacitor.Plugins.Haptics;
+            if (n === 'click') Haptics.impact({ style: 'LIGHT' });
+            else if (n === 'cash' || n === 'money' || n === 'pickup') Haptics.notification({ type: 'SUCCESS' });
+            else if (n === 'error') Haptics.notification({ type: 'ERROR' });
+            else if (n === 'hurt' || n === 'stun' || n === 'bark' || n === 'horn') Haptics.impact({ style: 'HEAVY' });
+        }
     }
     playMusicSequence(introName, loopName) {
         if (this.mv <= 0.01) { this.cur = loopName; return; }
@@ -167,8 +183,8 @@ class AssetManager {
 
 // --- GİRİŞ YÖNETİCİSİ (MOBİL JOYSTICK DESTEKLİ) ---
 class InputHandler {
-    constructor(canvas, cam) {
-        this.c = canvas; this.cam = cam;
+    constructor(canvas, cam, game) {
+        this.c = canvas; this.cam = cam; this.game = game || null;
         this.active = false; this.target = { x: 0, y: 0 };
 
         // Sanal joystick durumu
@@ -192,12 +208,12 @@ class InputHandler {
         window.addEventListener('mousemove', ev => { if (this.active) this._updTarget(ev.clientX, ev.clientY); });
         window.addEventListener('mouseup',   () => { this.active = false; document.body.classList.remove('clicking'); });
 
-        // Dokunma olayları (Mobil)
+        // Dokunma olayları (Mobil) – Sadece Joystick
         canvas.addEventListener('touchstart', ev => {
             ev.preventDefault();
             for (const t of ev.changedTouches) {
-                // Joystick: ekranın SOL yarısına dokunan parmak
-                if (this.isMobile && t.clientX < window.innerWidth / 2 && this.joystick.touchId === null) {
+                // İlk parmak her yere basabilir, joystick'i başlatır
+                if (this.isMobile && this.joystick.touchId === null) {
                     this.joystick.active = true;
                     this.joystick.touchId = t.identifier;
                     this.joystick.originX  = t.clientX;
@@ -205,11 +221,6 @@ class InputHandler {
                     this.joystick.currentX = t.clientX;
                     this.joystick.currentY = t.clientY;
                     this.active = true;
-                } else {
-                    // Sağ yarı: klasik "tıkla-git" modu
-                    this.active = true;
-                    this._updTarget(t.clientX, t.clientY);
-                    document.body.classList.add('clicking');
                 }
             }
         }, { passive: false });
@@ -220,8 +231,6 @@ class InputHandler {
                 if (t.identifier === this.joystick.touchId) {
                     this.joystick.currentX = t.clientX;
                     this.joystick.currentY = t.clientY;
-                } else if (this.active && this.joystick.touchId === null) {
-                    this._updTarget(t.clientX, t.clientY);
                 }
             }
         }, { passive: false });
@@ -232,10 +241,7 @@ class InputHandler {
                     this.joystick.active = false;
                     this.joystick.touchId = null;
                     this.inputVec = { x: 0, y: 0 };
-                    if (!this.active) document.body.classList.remove('clicking');
-                } else {
                     this.active = false;
-                    document.body.classList.remove('clicking');
                 }
             }
         }, { passive: false });
@@ -246,10 +252,15 @@ class InputHandler {
         });
     }
 
-    _updTarget(x, y) { this.target.x = x + this.cam.x; this.target.y = y + this.cam.y; }
+    _updTarget(x, y) {
+        // Zoom varsa ekran koordinatını dünya koordinatına dönüştürürken ölçek uygula
+        const z = (this.game && this.game.zoomScale) ? this.game.zoomScale : 1.0;
+        this.target.x = (x / z) + this.cam.x;
+        this.target.y = (y / z) + this.cam.y;
+    }
 
     getInputVector(px, py) {
-        // Joystick aktifse: joystick vektörünü döndür
+        // Mobilde sadece joystick kullanılır
         if (this.joystick.active) {
             const dx = this.joystick.currentX - this.joystick.originX;
             const dy = this.joystick.currentY - this.joystick.originY;
@@ -261,12 +272,15 @@ class InputHandler {
             }
             return this.inputVec;
         }
-        // Klasik tıkla-git
-        if (!this.active) return { x: 0, y: 0 };
-        const dx = this.target.x - px, dy = this.target.y - py;
-        const d  = Math.sqrt(dx * dx + dy * dy);
-        if (d < 10) return { x: 0, y: 0 };
-        return { x: dx / d, y: dy / d };
+        // PC: tıkla-git (sadece masaüstünde)
+        if (!this.isMobile) {
+            if (!this.active) return { x: 0, y: 0 };
+            const dx = this.target.x - px, dy = this.target.y - py;
+            const d  = Math.sqrt(dx * dx + dy * dy);
+            if (d < 10) return { x: 0, y: 0 };
+            return { x: dx / d, y: dy / d };
+        }
+        return { x: 0, y: 0 };
     }
 
     // Canvas üzerine joystick çiz (loop'tan çağrılır)
@@ -723,7 +737,12 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.assets = new AssetManager();
         this.cam = new Camera(this.canvas.width, this.canvas.height);
-        this.input = new InputHandler(this.canvas, this.cam);
+
+        // Mobil tespiti ve zoom – tek yerden yapılır
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        this.zoomScale = this.isMobile ? 0.65 : 1.0;
+
+        this.input = new InputHandler(this.canvas, this.cam, this);
         this.player = new Player(CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2);
         this.van = new Entity(CONFIG.WORLD_WIDTH / 2 - 100, CONFIG.WORLD_HEIGHT / 2 + 100, 360, 240, 'vehicle');
 
@@ -734,8 +753,9 @@ class Game {
 
         this.lastTime = 0; this.spawnT = 0; this.depT = 0;
         this.capUp = 0; this.spdUp = 0; this.hlpUp = 0; this.clnUp = 0; this.a3T = 0;
-        this.totalTime = 0; this.bossWave = 0; this.intruderWave = 0;
+        this.totalTime = 0; this.bossWave = 0; this.intruderWave = 0; this.intruderMusicWave = 0;
         this.bossActive = false; this.civsSpawnedForWave = false;
+        this.bossWarned = [false, false, false]; this.bossMusicPlayed = [false, false, false];
         this.pandemicActive = false; this.pandemicTimer = 0;
         this.wave3Cleared = false; this.valiTimer = 0; this.valiAlertShown = false;
         this.valiActive = false; this.gameOver = false;
@@ -744,6 +764,9 @@ class Game {
 
         this.sm = new SoundManager();
         this.sm.loadSounds();
+        this.setupCapacitor();
+
+        this.autoSaveTimer = 0; // Otomatik kayıt sayacı (saniye)
 
         this.uiMoney = document.getElementById('money-val');
         this.uiScore = document.getElementById('score-val');
@@ -878,6 +901,12 @@ class Game {
         });
     }
 
+    async setupCapacitor() {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
+            try { await window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'landscape' }); } catch(e) {}
+        }
+    }
+
     showScores() {
         const sc = JSON.parse(localStorage.getItem('kocaeli_scores')) || [];
         const tb = document.getElementById('score-table-body');
@@ -918,7 +947,16 @@ class Game {
         if (this.uiMoney) this.uiMoney.innerText = this.player.money;
     }
 
-    resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; if (this.cam) { this.cam.w = this.canvas.width; this.cam.h = this.canvas.height; } }
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        if (this.cam) { this.cam.w = this.canvas.width; this.cam.h = this.canvas.height; }
+        // Mobil zoom güncelle: canvas boyutu değişince efektif kamera alanını güncelle
+        if (this.isMobile) {
+            this.cam.w = this.canvas.width / this.zoomScale;
+            this.cam.h = this.canvas.height / this.zoomScale;
+        }
+    }
 
     initWorld() {
         for (let i = 0; i < CONFIG.ACTIVIST_COUNT; i++) this.spawnActivist(i % 2 === 0 ? 1 : 2);
@@ -927,22 +965,77 @@ class Game {
     }
 
     saveGame() {
-        const d = { money: this.player.money, score: this.score, spdUp: this.spdUp, capUp: this.capUp, clnUp: this.clnUp, hlpUp: this.hlpUp, polUp: this.police.length };
+        const d = {
+            money: this.player.money, score: this.score,
+            spdUp: this.spdUp, capUp: this.capUp, clnUp: this.clnUp, hlpUp: this.hlpUp, polUp: this.police.length,
+            playerState: { x: this.player.x, y: this.player.y, stack: this.player.stack.map(s => ({ isBossDog: s.isBossDog })) },
+            totalTime: this.totalTime,
+            bossWave: this.bossWave, intruderWave: this.intruderWave, intruderMusicWave: this.intruderMusicWave,
+            bossWarned: this.bossWarned, bossMusicPlayed: this.bossMusicPlayed,
+            bossActive: this.bossActive, civsSpawnedForWave: this.civsSpawnedForWave,
+            pandemicActive: this.pandemicActive, pandemicTimer: this.pandemicTimer,
+            wave3Cleared: this.wave3Cleared, valiTimer: this.valiTimer, valiAlertShown: this.valiAlertShown, valiActive: this.valiActive,
+            dogs: this.dogs.filter(x => !x.isCollected).map(x => ({ x: x.x, y: x.y, isBossDog: x.isBossDog })),
+            activists: this.activists.map(x => ({ x: x.x, y: x.y, type: x.type })),
+            a3List: this.a3List.map(x => ({ x: x.x, y: x.y, state: x.state })),
+            food: this.food.map(x => ({ x: x.x, y: x.y })),
+            civs: this.civs.map(x => ({ x: x.x, y: x.y, assetName: x.assetName })),
+            bossList: this.bossList.map(x => ({ x: x.x, y: x.y, maxDrops: x.maxDrops, dropCount: x.dropCount, state: x.state })),
+            bossFood: this.bossFood.map(x => ({ x: x.x, y: x.y, timer: x.timer })),
+            intruderList: this.intruderList.map(x => ({ x: x.x, y: x.y, state: x.state, timer: x.timer, dropTimer: x.dropTimer })),
+            valiList: this.valiList.map(x => ({ x: x.x, y: x.y, state: x.state }))
+        };
         localStorage.setItem('kocaeli_save', JSON.stringify(d));
     }
 
     loadGame() {
         const s = localStorage.getItem('kocaeli_save'); if (!s) return;
         const d = JSON.parse(s);
+        
         this.player.money = d.money || 0; this.score = d.score || 0;
         this.spdUp = d.spdUp || 0; this.capUp = d.capUp || 0; this.clnUp = d.clnUp || 0; this.hlpUp = d.hlpUp || 0;
         const pc = d.polUp || 0;
+        
         for (let i = 0; i < this.spdUp; i++) { this.player.speed += 50; CONFIG.UPGRADE_COST_SPEED = Math.floor(CONFIG.UPGRADE_COST_SPEED * 1.5); }
         for (let i = 0; i < this.capUp; i++) { this.player.maxCapacity++; CONFIG.UPGRADE_COST_CAPACITY = Math.floor(CONFIG.UPGRADE_COST_CAPACITY * 1.5); }
         for (let i = 0; i < this.clnUp; i++) { this.cleaners.push(new Cleaner(CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2)); CONFIG.UPGRADE_COST_CLEANER = Math.floor(CONFIG.UPGRADE_COST_CLEANER * 1.5); }
         for (let i = 0; i < this.hlpUp; i++) { this.helpers.push(new Helper(CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2)); CONFIG.UPGRADE_COST_HELPER = Math.floor(CONFIG.UPGRADE_COST_HELPER * 1.5); CONFIG.DOG_SPAWN_INTERVAL *= 0.8; }
         for (let i = 0; i < pc; i++) { this.police.push(new Police(CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2)); CONFIG.UPGRADE_COST_POLICE = Math.floor(CONFIG.UPGRADE_COST_POLICE * 1.5); }
         this.updUI();
+
+        if (d.totalTime !== undefined) {
+            this.totalTime = d.totalTime;
+            this.bossWave = d.bossWave || 0; this.intruderWave = d.intruderWave || 0; this.intruderMusicWave = d.intruderMusicWave || 0;
+            this.bossWarned = d.bossWarned || [false,false,false]; this.bossMusicPlayed = d.bossMusicPlayed || [false,false,false];
+            this.bossActive = d.bossActive || false; this.civsSpawnedForWave = d.civsSpawnedForWave || false;
+            this.pandemicActive = d.pandemicActive || false; this.pandemicTimer = d.pandemicTimer || 0;
+            this.wave3Cleared = d.wave3Cleared || false; this.valiTimer = d.valiTimer || 0; this.valiAlertShown = d.valiAlertShown || false; this.valiActive = d.valiActive || false;
+            
+            if (d.playerState) {
+                this.player.x = d.playerState.x; this.player.y = d.playerState.y;
+                this.player.stack = [];
+                d.playerState.stack.forEach(st => {
+                    const nd = st.isBossDog ? new BossDog(this.player.x, this.player.y) : new Dog(this.player.x, this.player.y);
+                    nd.isCollected = true; this.player.stack.push(nd);
+                });
+            }
+            
+            this.dogs = []; this.activists = []; this.a3List = []; this.food = [];
+            this.civs = []; this.bossList = []; this.bossFood = []; this.intruderList = []; this.valiList = [];
+            
+            if (d.dogs) d.dogs.forEach(x => { const nd = x.isBossDog ? new BossDog(x.x, x.y) : new Dog(x.x, x.y); this.dogs.push(nd); });
+            if (d.activists) d.activists.forEach(x => this.activists.push(new Activist(x.x, x.y, x.type)));
+            if (d.a3List) d.a3List.forEach(x => { const na = new Activist3(x.x, x.y, this.van); na.state = x.state; this.a3List.push(na); });
+            if (d.food) d.food.forEach(x => this.food.push(new DogFood(x.x, x.y)));
+            if (d.civs) d.civs.forEach(x => { const nc = new Civilian(x.x, x.y); nc.assetName = x.assetName; this.civs.push(nc); });
+            if (d.bossList) d.bossList.forEach(x => { const nb = new Boss(x.x, x.y, x.maxDrops); nb.dropCount = x.dropCount; nb.state = x.state; this.bossList.push(nb); });
+            if (d.bossFood) d.bossFood.forEach(x => { const nf = new BossFood(x.x, x.y); nf.timer = x.timer; this.bossFood.push(nf); });
+            if (d.intruderList) d.intruderList.forEach(x => { const ni = new IntruderVehicle(); ni.x = x.x; ni.y = x.y; ni.state = x.state; ni.timer = x.timer; ni.dropTimer = x.dropTimer; this.intruderList.push(ni); });
+            if (d.valiList) d.valiList.forEach(x => { const nv = new Vali(); nv.x = x.x; nv.y = x.y; nv.state = x.state; this.valiList.push(nv); });
+            
+            const h = document.getElementById('pandemic-hud');
+            if (this.pandemicActive && h) h.style.display = 'block';
+        }
     }
 
     saveHighScore() {
@@ -1014,12 +1107,16 @@ class Game {
 
     startPandemic() {
         this.pandemicActive = true;
-        if (this.bossWave === 1) this.pandemicTimer = 60; else if (this.bossWave === 2) this.pandemicTimer = 45; else this.pandemicTimer = 30;
+        if (this.bossWave === 1) this.pandemicTimer = CONFIG.TIMINGS.BOSS_1_PANDEMIC_DURATION; 
+        else if (this.bossWave === 2) this.pandemicTimer = CONFIG.TIMINGS.BOSS_2_PANDEMIC_DURATION; 
+        else this.pandemicTimer = CONFIG.TIMINGS.BOSS_3_PANDEMIC_DURATION;
         const h = document.getElementById('pandemic-hud'); if (h) h.style.display = 'block';
     }
 
     startCelebration() {
         this.celebrationActive = true; this.dogs = []; this.activists = []; this.food = [];
+        // Celebration'da market butonunu gizle
+        const mb = document.getElementById('market-btn'); if (mb) mb.style.display = 'none';
         const cx = CONFIG.WORLD_WIDTH / 2, cy = CONFIG.WORLD_HEIGHT / 2, vanY = this.van.y, civY = vanY + 150;
         this.civs.forEach((c, i) => {
             c.celebrationTarget = { x: cx + (i - this.civs.length / 2) * 80, y: civY };
@@ -1067,21 +1164,29 @@ class Game {
 
                 this.totalTime += dt;
 
+                // Otomatik kayıt (her 30 saniyede bir)
+                this.autoSaveTimer += dt;
+                if (this.autoSaveTimer >= 30) { this.saveGame(); this.autoSaveTimer = 0; }
+
                 // İstilacı araç
-                if (this.totalTime >= 300 && this.intruderWave < 1) { this.spawnIntruder(); this.intruderWave = 1; this.sm.playMusicSequence('intruder_vehiclewave1_1', 'intruder_vehiclewave1_2'); }
-                if (this.totalTime >= 600 && this.intruderWave < 2) { this.spawnIntruder(); this.intruderWave = 2; this.sm.playMusicSequence('intruder_vehiclewave2_1', 'intruder_vehiclewave2_2'); }
+                if (this.totalTime >= CONFIG.TIMINGS.MUSIC_INTRUDER_1_TIME && this.intruderMusicWave < 1) { this.sm.playMusicSequence('intruder_vehiclewave1_1', 'intruder_vehiclewave1_2'); this.intruderMusicWave = 1; }
+                if (this.totalTime >= CONFIG.TIMINGS.INTRUDER_1_TIME && this.intruderWave < 1) { this.spawnIntruder(); this.intruderWave = 1; }
+                if (this.totalTime >= CONFIG.TIMINGS.MUSIC_INTRUDER_2_TIME && this.intruderMusicWave < 2) { this.sm.playMusicSequence('intruder_vehiclewave2_1', 'intruder_vehiclewave2_2'); this.intruderMusicWave = 2; }
+                if (this.totalTime >= CONFIG.TIMINGS.INTRUDER_2_TIME && this.intruderWave < 2) { this.spawnIntruder(); this.intruderWave = 2; }
 
                 // Boss dalgaları
                 if (this.bossWave < 1) {
-                    if (this.totalTime >= 830 && !this.civsSpawnedForWave) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.civsSpawnedForWave = true; }
-                    if (this.totalTime >= 840) { this.bossWave = 1; this.spawnBoss(CONFIG.BOSS_DROPS_BASE); this.bossActive = true; this.civsSpawnedForWave = false; this.sm.playMusicSequence('bosswave1_1', 'bosswave1_2'); }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_1_WARN_TIME && !this.bossWarned[0]) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.bossWarned[0] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.MUSIC_BOSS_1_TIME && !this.bossMusicPlayed[0]) { this.sm.playMusicSequence('bosswave1_1', 'bosswave1_2'); this.bossMusicPlayed[0] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_1_SPAWN_TIME) { this.bossWave = 1; this.spawnBoss(CONFIG.BOSS_DROPS_BASE); this.bossActive = true; }
                 } else if (this.bossWave < 2) {
-                    if (this.totalTime >= 1010 && !this.civsSpawnedForWave) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.civsSpawnedForWave = true; }
-                    if (this.totalTime >= 1020) { this.bossWave = 2; this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 1.5)); this.bossActive = true; this.civsSpawnedForWave = false; this.sm.playMusicSequence('bosswave2_1', 'bosswave2_2'); }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_2_WARN_TIME && !this.bossWarned[1]) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.bossWarned[1] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.MUSIC_BOSS_2_TIME && !this.bossMusicPlayed[1]) { this.sm.playMusicSequence('bosswave2_1', 'bosswave2_2'); this.bossMusicPlayed[1] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_2_SPAWN_TIME) { this.bossWave = 2; this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 1.5)); this.bossActive = true; }
                 } else if (this.bossWave < 3) {
-                    if (this.totalTime >= 1300 && !this.civsSpawnedForWave) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.civsSpawnedForWave = true; }
-                    if (this.totalTime >= 1310 && this.totalTime < 1380) this.sm.playMusicSequence('bosswave3_1', 'vali');
-                    if (this.totalTime >= 1380) { this.bossWave = 3; this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 2.25)); this.bossActive = true; this.civsSpawnedForWave = false; }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_3_WARN_TIME && !this.bossWarned[2]) { for (let i = 0; i < 10; i++) this.spawnCiv(); document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.bossWarned[2] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.MUSIC_BOSS_3_TIME && !this.bossMusicPlayed[2]) { this.sm.playMusicSequence('bosswave3_1', 'vali'); this.bossMusicPlayed[2] = true; }
+                    if (this.totalTime >= CONFIG.TIMINGS.BOSS_3_SPAWN_TIME) { this.bossWave = 3; this.spawnBoss(Math.floor(CONFIG.BOSS_DROPS_BASE * 2.25)); this.bossActive = true; }
                 }
 
                 if (this.bossActive && this.bossList.length === 0) { this.bossActive = false; this.score += this.civs.length * 20; this.startPandemic(); }
@@ -1099,8 +1204,8 @@ class Game {
                 // Vali
                 if (this.wave3Cleared && !this.valiActive) {
                     this.valiTimer += dt;
-                    if (this.valiTimer > 3 && !this.valiAlertShown) { document.getElementById('boss-alert').innerText = "The Vali Geliyor"; document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.valiAlertShown = true; }
-                    if (this.valiTimer > 6) this.spawnVali();
+                    if (this.valiTimer > CONFIG.TIMINGS.VALI_WARN_DELAY && !this.valiAlertShown) { document.getElementById('boss-alert').innerText = "The Vali Geliyor"; document.getElementById('boss-alert').style.display = 'block'; setTimeout(() => document.getElementById('boss-alert').style.display = 'none', 3000); this.valiAlertShown = true; }
+                    if (this.valiTimer > CONFIG.TIMINGS.VALI_SPAWN_DELAY) this.spawnVali();
                 }
                 if (this.valiActive && this.activists.filter(a => a.type === 2).length === 0 && !this.celebrationActive) this.startCelebration();
 
@@ -1133,31 +1238,47 @@ class Game {
                 if (this.uiScore) this.uiScore.innerText = this.score;
             }
 
-            // Çizim
+            // Çizim – mobilde zoom-out uygulanır (ctx scale)
             this.ctx.fillStyle = '#333'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             const bg = this.assets.get('background');
-            this.ctx.save(); this.ctx.translate(-this.cam.x, -this.cam.y);
+            this.ctx.save();
+            if (this.isMobile && this.zoomScale !== 1.0) {
+                // Ekranı küçült → daha fazla alan görünsün
+                this.ctx.scale(this.zoomScale, this.zoomScale);
+            }
+            this.ctx.translate(-this.cam.x, -this.cam.y);
             if (bg) this.ctx.drawImage(bg, 0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
             this.ctx.restore();
-            // Güvenli bölge çemberi
-            this.ctx.save(); this.ctx.translate(CONFIG.WORLD_WIDTH / 2 - this.cam.x, CONFIG.WORLD_HEIGHT / 2 - this.cam.y); this.ctx.fillStyle = 'rgba(100,200,100,0.3)'; this.ctx.beginPath(); this.ctx.arc(0, 0, CONFIG.SAFE_ZONE_RADIUS, 0, Math.PI * 2); this.ctx.fill(); this.ctx.restore();
+            // Güvenli bölge çemberi – zoom ile hizalı
+            this.ctx.save();
+            if (this.isMobile && this.zoomScale !== 1.0) this.ctx.scale(this.zoomScale, this.zoomScale);
+            this.ctx.translate(CONFIG.WORLD_WIDTH / 2 - this.cam.x, CONFIG.WORLD_HEIGHT / 2 - this.cam.y);
+            this.ctx.fillStyle = 'rgba(100,200,100,0.3)'; this.ctx.beginPath(); this.ctx.arc(0, 0, CONFIG.SAFE_ZONE_RADIUS, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.restore();
 
             const all = [this.player, this.van, ...this.dogs, ...this.activists, ...this.a3List, ...this.food, ...this.civs, ...this.cleaners, ...this.helpers, ...this.police, ...this.bossList, ...this.bossFood, ...this.intruderList, ...this.valiList];
             all.sort((a, b) => a.y - b.y);
+            // Tüm entity çizimleri de zoom ile birlikte çizilmeli
+            this.ctx.save();
+            if (this.isMobile && this.zoomScale !== 1.0) this.ctx.scale(this.zoomScale, this.zoomScale);
             this.particles.forEach(p => { p.update(dt); p.draw(this.ctx, this.cam); });
             for (let i = this.particles.length - 1; i >= 0; i--) { if (this.particles[i].life <= 0) this.particles.splice(i, 1); }
             all.forEach(e => { if (e instanceof Dog) e.trackDust(this.particles, dt); e.draw(this.ctx, this.assets, this.cam); });
+            this.ctx.restore();
 
             // Hedef çizgisi (sadece PC modunda ve joystick aktif değilken)
             if (this.input.active && !this.celebrationActive && !this.input.joystick.active) {
-                const px = this.player.x - this.cam.x, py = this.player.y - this.cam.y;
-                const tx = this.input.target.x - this.cam.x, ty = this.input.target.y - this.cam.y;
+                // PC hedef çizgisi – zoom'dan bağımsız, ham canvas koordinatlarında
+                const px = (this.player.x - this.cam.x) * (this.isMobile ? this.zoomScale : 1);
+                const py = (this.player.y - this.cam.y) * (this.isMobile ? this.zoomScale : 1);
+                const tx = (this.input.target.x - this.cam.x) * (this.isMobile ? this.zoomScale : 1);
+                const ty = (this.input.target.y - this.cam.y) * (this.isMobile ? this.zoomScale : 1);
                 this.ctx.strokeStyle = 'rgba(255,255,255,0.5)'; this.ctx.lineWidth = 2;
                 this.ctx.beginPath(); this.ctx.moveTo(px, py); this.ctx.lineTo(tx, ty); this.ctx.stroke();
                 this.ctx.fillStyle = 'rgba(255,255,255,0.5)'; this.ctx.beginPath(); this.ctx.arc(tx, ty, 10, 0, Math.PI * 2); this.ctx.fill();
             }
 
-            // Sanal joystick çiz (mobil – dünya koordinatlarından bağımsız, ekran üzerinde)
+            // Sanal joystick çiz (mobil – ekran koordinatlarında, zoom'dan etkilenmez)
             this.input.drawJoystick(this.ctx);
 
             requestAnimationFrame(t => this.loop(t));
