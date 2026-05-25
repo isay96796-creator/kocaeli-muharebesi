@@ -165,79 +165,142 @@ canvas { display: block; cursor: inherit; }
 #menu-bottom img { filter: drop-shadow(5px 5px 5px #000); transition: transform 0.3s; }
 #menu-bottom img:hover { transform: translateY(-10px); }
 
-/* MODALS */
+/* MODAL */
 .modal-overlay {
     display: none; position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); z-index: 500;
+    background: rgba(0,0,0,0.75); z-index: 500;
     justify-content: center; align-items: center;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
 }
 .modal-box, .modal-content {
-    background: #fff; color: #333; padding: 30px;
+    background: linear-gradient(145deg, #1e1e2e, #16162a);
+    color: #eee; padding: 30px;
     border-radius: 20px; width: 90%; max-width: 500px;
     text-align: center; position: relative;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    display: flex; flex-direction: column; gap: 15px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; gap: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 .modal-content { max-width: 700px; }
 .modal-close {
     position: absolute; top: 15px; right: 20px;
-    font-size: 36px; font-weight: bold; cursor: pointer;
-    color: #555; line-height: 1; z-index: 501; transition: 0.2s;
+    font-size: 30px; font-weight: bold; cursor: pointer;
+    color: rgba(255,255,255,0.4); line-height: 1; z-index: 501; transition: 0.2s;
 }
-.modal-close:hover { color: #f44336; transform: scale(1.2); }
-.modal-title { font-size: 32px; font-weight: bold; margin-bottom: 10px; color: #4CAF50; }
-.setting-row {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 20px; background: #f0f0f0;
-    padding: 15px; border-radius: 10px;
-    flex-wrap: wrap; gap: 10px;
+.modal-close:hover { color: #ff6b6b; transform: scale(1.2); }
+.modal-title {
+    font-size: 26px; font-weight: bold; margin-bottom: 4px;
+    color: #fff; letter-spacing: 0.5px;
 }
-input[type=range] { width: 150px; cursor: pointer; }
-.modal-btn {
-    padding: 15px; font-size: 20px; font-weight: bold;
-    border: none; border-radius: 10px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; transition: 0.2s;
+
+/* AYARLAR – SECTION KARTI */
+.setting-section {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    text-align: left;
 }
-.btn-green { background: #4CAF50; color: white; }
-.btn-blue  { background: #2196F3; color: white; }
-.btn-red   { background: #f44336; color: white; }
-.btn-dark  { background: #333; color: white; }
-.modal-btn:hover { opacity: 0.9; transform: scale(1.02); }
-.modal-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.setting-label {
+    font-size: 14px; font-weight: 600;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* İsim satırı */
+.setting-name-row { display: flex; gap: 8px; }
+.setting-name-input {
+    flex: 1; padding: 10px 14px; font-size: 18px;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08); color: #fff; outline: none;
+    transition: border-color 0.2s;
+}
+.setting-name-input:focus { border-color: #4CAF50; }
+.setting-name-input::placeholder { color: rgba(255,255,255,0.3); }
+.setting-save-btn {
+    padding: 10px 18px; font-size: 20px; font-weight: bold;
+    background: #4CAF50; color: #fff; border: none;
+    border-radius: 10px; cursor: pointer; transition: 0.2s;
+    flex-shrink: 0;
+}
+.setting-save-btn:hover { background: #43a047; transform: scale(1.05); }
+
+/* Slider satırı */
+.setting-slider-row {
+    display: flex; align-items: center; gap: 12px;
+}
+.slider-icon { font-size: 18px; flex-shrink: 0; }
+.styled-slider {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 6px; border-radius: 6px; outline: none;
+    background: linear-gradient(to right, #4CAF50 var(--val, 50%), rgba(255,255,255,0.15) var(--val, 50%));
+    cursor: pointer; transition: opacity 0.2s;
+}
+.styled-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: transform 0.15s;
+}
+.styled-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.styled-slider::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; cursor: pointer; border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Oyun içi 2x2 buton grid */
+.ingame-btn-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.ingame-action-btn {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px;
+    padding: 14px 10px; font-size: 13px; font-weight: bold;
+    border: none; border-radius: 14px; cursor: pointer;
+    transition: 0.18s; color: #fff; letter-spacing: 0.3px;
+}
+.ingame-action-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.ingame-action-btn:active { transform: scale(0.94); opacity: 0.8; }
+.ingame-action-btn.btn-dark  { background: rgba(255,255,255,0.12); }
+.ingame-action-btn.btn-green { background: linear-gradient(135deg,#43a047,#2e7d32); }
+.ingame-action-btn.btn-blue  { background: linear-gradient(135deg,#1e88e5,#1565c0); }
+.ingame-action-btn.btn-red   { background: linear-gradient(135deg,#e53935,#b71c1c); }
+
 
 /* MARKET */
 .market-header {
-    font-size: 48px; font-weight: 900; color: #ff9800;
-    margin-bottom: 20px; text-transform: uppercase;
-    letter-spacing: 2px; text-shadow: 1px 1px 0 #333;
-    border-bottom: 3px solid #ff9800;
+    font-size: 42px; font-weight: 900; color: #ff9800;
+    margin-bottom: 16px; text-transform: uppercase;
+    letter-spacing: 2px; text-shadow: 0 0 20px rgba(255,152,0,0.4);
+    border-bottom: 2px solid rgba(255,152,0,0.4);
     display: inline-block; padding-bottom: 5px;
 }
 .upgrade-grid {
     display: flex; justify-content: space-around;
-    margin-top: 10px; gap: 15px; flex-wrap: wrap;
+    margin-top: 10px; gap: 12px; flex-wrap: wrap;
 }
 .upgrade-card {
-    background: #f8f8f8; padding: 15px; border-radius: 15px;
-    flex: 1; min-width: 130px;
+    background: rgba(255,255,255,0.07); padding: 15px; border-radius: 16px;
+    flex: 1; min-width: 120px;
     display: flex; flex-direction: column; align-items: center;
-    cursor: pointer; border: 2px solid #ddd; transition: 0.2s;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.12); transition: 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
-.upgrade-card:hover { transform: translateY(-5px); border-color: #ff9800; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-.upgrade-card.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); transform: none; }
-.upgrade-title { font-weight: bold; font-size: 18px; color: #333; margin: 5px 0; }
-.upgrade-icon { width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; }
-.upgrade-price { background: #4CAF50; color: white; padding: 5px 15px; border-radius: 15px; margin-top: 5px; font-weight: bold; font-size: 16px; }
+.upgrade-card:hover { transform: translateY(-4px); border-color: #ff9800; box-shadow: 0 8px 24px rgba(255,152,0,0.2); background: rgba(255,255,255,0.11); }
+.upgrade-card.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); transform: none; }
+.upgrade-title { font-weight: bold; font-size: 16px; color: #fff; margin: 6px 0 2px; }
+.upgrade-icon { width: 65px; height: 65px; object-fit: contain; margin-bottom: 4px; }
+.upgrade-price { background: linear-gradient(135deg,#ff9800,#e65100); color: white; padding: 4px 14px; border-radius: 12px; margin-top: 4px; font-weight: bold; font-size: 15px; }
 
 /* SCOREBOARD */
 .score-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.score-table th, .score-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
-.score-table th { background: #eee; }
-.score-table tr:nth-child(even) { background: #fafafa; }
+.score-table th, .score-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; color: #ddd; }
+.score-table th { background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; }
+.score-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
 
 /* HOW TO PLAY */
 #how-to-play {
@@ -414,38 +477,40 @@ input[type=range] { width: 150px; cursor: pointer; }
     #mm-fullscreen-btn svg { width: 16px; height: 16px; }
 
     /* ---- MODAL GENEL ---- */
-    .modal-overlay { padding: 0; align-items: flex-end; }
+    /* ---- MODAL – Mobilde ortalanmış, kompakt ---- */
+    .modal-overlay { align-items: flex-end; }
     .modal-box, .modal-content {
         width: 100%; max-width: 100%;
         border-radius: 24px 24px 0 0;
-        padding: 10px 16px 24px;
-        max-height: 80vh;
+        padding: 8px 14px 20px;
+        max-height: 82vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        /* Handle bar ("bottom sheet" tutma çubuğu) */
-        background-image: linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
-        background-size: 40px 4px;
-        background-repeat: no-repeat;
-        background-position: center 8px;
-        padding-top: 22px;
     }
-    /* Handle bar görsel olarak üstüne */
+    /* Handle bar */
     .modal-box::before, .modal-content::before {
         content: '';
         display: block;
-        width: 40px; height: 4px;
-        background: #ccc; border-radius: 4px;
-        margin: 0 auto 14px;
+        width: 36px; height: 4px;
+        background: rgba(255,255,255,0.2); border-radius: 4px;
+        margin: 0 auto 12px;
     }
-    .modal-title { font-size: 22px; margin-bottom: 6px; }
-    .modal-close  { font-size: 32px; top: 10px; right: 14px; }
+    .modal-title { font-size: 20px; margin-bottom: 2px; }
+    .modal-close  { font-size: 28px; top: 10px; right: 14px; }
 
-    .setting-row  { font-size: 15px; padding: 14px 12px; min-height: 52px; }
-    input[type=range] { width: 130px; height: 28px; }
+    /* Setting section mobilde daha sıkı */
+    .setting-section { padding: 12px 14px; gap: 8px; }
+    .setting-label { font-size: 11px; }
+    .setting-name-input { font-size: 16px; padding: 9px 12px; }
+    .setting-save-btn   { font-size: 18px; padding: 9px 14px; }
+    .styled-slider::-webkit-slider-thumb { width: 26px; height: 26px; }
 
-    /* Ayarlar butonları – daha büyük dokunma hedefi */
-    .modal-btn { font-size: 17px; padding: 16px 12px; border-radius: 14px; }
-    .modal-btn svg { width: 22px; height: 22px; }
+    /* Ingame 2x2 grid mobilde tam genişlik */
+    .ingame-btn-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ingame-action-btn { font-size: 12px; padding: 14px 8px; border-radius: 12px; }
+    .ingame-action-btn svg { width: 22px; height: 22px; }
+
+
 
     /* ---- MARKET ---- */
     .market-header { font-size: 26px; margin-bottom: 10px; }

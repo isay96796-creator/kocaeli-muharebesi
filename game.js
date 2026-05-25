@@ -826,22 +826,16 @@ class Game {
             menu.style.display = 'none';
             document.getElementById('ui-layer').style.display = 'block';
             this.lastTime = performance.now();
-            // Müziği totalTime'a göre doğru noktadan başlat
-            const T = this.totalTime;
+            // Müzik: önce tamamen durdur, sonra totalTime'a göre doğru parçayı çal
+            this.sm.stop();
+            const T  = this.totalTime;
             const TM = CONFIG.TIMINGS;
-            if (T >= TM.MUSIC_BOSS_3_TIME && this.bossMusicPlayed[2]) {
-                this.sm.playLoop('vali');
-            } else if (T >= TM.MUSIC_BOSS_2_TIME && this.bossMusicPlayed[1]) {
-                this.sm.playMusicSequence('bosswave2_1', 'bosswave2_2');
-            } else if (T >= TM.MUSIC_BOSS_1_TIME && this.bossMusicPlayed[0]) {
-                this.sm.playMusicSequence('bosswave1_1', 'bosswave1_2');
-            } else if (T >= TM.MUSIC_INTRUDER_2_TIME && this.intruderMusicWave >= 2) {
-                this.sm.playMusicSequence('intruder_vehiclewave2_1', 'intruder_vehiclewave2_2');
-            } else if (T >= TM.MUSIC_INTRUDER_1_TIME && this.intruderMusicWave >= 1) {
-                this.sm.playMusicSequence('intruder_vehiclewave1_1', 'intruder_vehiclewave1_2');
-            } else {
-                this.sm.playMusicSequence('gamestart1', 'gamestart2');
-            }
+            if      (T >= TM.MUSIC_BOSS_3_TIME)     this.sm.playLoop('vali');
+            else if (T >= TM.MUSIC_BOSS_2_TIME)     this.sm.playMusicSequence('bosswave2_1',           'bosswave2_2');
+            else if (T >= TM.MUSIC_BOSS_1_TIME)     this.sm.playMusicSequence('bosswave1_1',           'bosswave1_2');
+            else if (T >= TM.MUSIC_INTRUDER_2_TIME) this.sm.playMusicSequence('intruder_vehiclewave2_1','intruder_vehiclewave2_2');
+            else if (T >= TM.MUSIC_INTRUDER_1_TIME) this.sm.playMusicSequence('intruder_vehiclewave1_1','intruder_vehiclewave1_2');
+            else                                     this.sm.playMusicSequence('gamestart1',            'gamestart2');
             requestAnimationFrame(t => this.loop(t));
         };
         document.getElementById('info-btn').onclick = () => { this.sm.playSFX('click'); howTo.style.display = 'flex'; updSlide(0); };
